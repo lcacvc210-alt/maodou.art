@@ -14,6 +14,9 @@ export default function PixelArtPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [showDemo, setShowDemo] = useState(true)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const demoCanvasRef = useRef<HTMLCanvasElement>(null)
+  const [demoStage, setDemoStage] = useState(0) // 0=原图，1=低密度，2=高密度
+  const [isAnimating, setIsAnimating] = useState(false)
 
   // 处理图片上传
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +98,117 @@ export default function PixelArtPage() {
     setPixelSize(16)
   }
 
+  // 演示动画
+  const playDemoAnimation = () => {
+    if (!demoCanvasRef.current || isAnimating) return
+    setIsAnimating(true)
+    setDemoStage(0)
+
+    const canvas = demoCanvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = document.createElement('img')
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      // 阶段 1：显示原图（2 秒）
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      
+      setTimeout(() => {
+        // 阶段 2：切割动画（1 秒）
+        animateCut(ctx, canvas.width, canvas.height, 8, () => {
+          // 阶段 3：组合成低密度像素图（1 秒）
+          pixelate(ctx, img, canvas.width, canvas.height, 8, () => {
+            setDemoStage(1)
+            
+            setTimeout(() => {
+              // 阶段 4：再次切割（1 秒）
+              animateCut(ctx, canvas.width, canvas.height, 32, () => {
+                // 阶段 5：组合成高密度像素图（1 秒）
+                pixelate(ctx, img, canvas.width, canvas.height, 32, () => {
+                  setDemoStage(2)
+                  setIsAnimating(false)
+                })
+              })
+            }, 1000)
+          })
+        })
+      }, 2000)
+    }
+    img.src = VAN_GOGH_URL
+  }
+
+  // 切割动画
+  const animateCut = (ctx: CanvasRenderingContext2D, width: number, height: number, gridSize: number, callback: () => void) => {
+    const blockSize = width / gridSize
+    let progress = 0
+    const animate = () => {
+      progress += 0.05
+      if (progress >= 1) {
+        callback()
+        return
+      }
+
+      ctx.clearRect(0, 0, width, height)
+      
+      // 绘制网格切割效果
+      for (let y = 0; y < height; y += blockSize) {
+        for (let x = 0; x < width; x += blockSize) {
+          ctx.strokeStyle = `rgba(0, 240, 255, ${progress})`
+          ctx.lineWidth = 2
+          ctx.strokeRect(x, y, blockSize, blockSize)
+        }
+      }
+      
+      requestAnimationFrame(animate)
+    }
+    animate()
+  }
+
+  // 像素化处理
+  const pixelate = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, width: number, height: number, gridSize: number, callback: () => void) => {
+    const blockSize = width / gridSize
+    let currentBlock = 0
+    const totalBlocks = gridSize * gridSize
+
+    const processNextBlock = () => {
+      if (currentBlock >= totalBlocks) {
+        callback()
+        return
+      }
+
+      const row = Math.floor(currentBlock / gridSize)
+      const col = currentBlock % gridSize
+      const x = col * blockSize
+      const y = row * blockSize
+
+      // 获取像素块内的平均颜色
+      const imageData = ctx.getImageData(x, y, blockSize, blockSize)
+      const data = imageData.data
+      
+      let r = 0, g = 0, b = 0, count = 0
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i]
+        g += data[i + 1]
+        b += data[i + 2]
+        count++
+      }
+      
+      r = Math.round(r / count)
+      g = Math.round(g / count)
+      b = Math.round(b / count)
+      
+      // 填充整个像素块为平均色
+      ctx.fillStyle = `rgb(${r},${g},${b})`
+      ctx.fillRect(x, y, blockSize, blockSize)
+
+      currentBlock++
+      setTimeout(processNextBlock, 10) // 每块间隔 10ms
+    }
+
+    processNextBlock()
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* 背景效果 */}
@@ -125,39 +239,70 @@ export default function PixelArtPage() {
             </p>
           </div>
 
-          {/* 示例演示区 */}
+          {/* 示例演示区 - 动态动画 */}
           {showDemo && (
             <div className="mb-12">
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-text-primary mb-2">
-                  🎨 效果演示（梵高自画像）
+                  🎨 像素化过程演示
                 </h2>
                 <p className="text-text-secondary">
-                  看看同一张图，不同像素密度的效果
+                  看梵高自画像如何一步步变成像素艺术
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6">
-                <DemoCard
-                  title="原图"
-                  image={VAN_GOGH_URL}
-                  description="文森特·梵高自画像（1887）"
-                  tag="原始"
-                />
-                <DemoCard
-                  title="大像素（8×8）"
-                  image="/api/pixel-demo?size=8"
-                  description="低密度，强像素感"
-                  tag="8×8 网格"
-                  pixelSize={8}
-                />
-                <DemoCard
-                  title="多像素（32×32）"
-                  image="/api/pixel-demo?size=32"
-                  description="高密度，细节保留"
-                  tag="32×32 网格"
-                  pixelSize={32}
-                />
+              <div className="card glow-border rounded-2xl p-8">
+                {/* 演示画布 */}
+                <div className="aspect-video bg-card rounded-xl overflow-hidden mb-6 flex items-center justify-center">
+                  <canvas
+                    ref={demoCanvasRef}
+                    width={800}
+                    height={450}
+                    className="max-w-full max-h-full"
+                  />
+                </div>
+
+                {/* 阶段指示器 */}
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <StageIndicator stage={0} current={demoStage} label="原图" icon="🖼️" />
+                  <div className={`w-16 h-1 bg-card rounded-full ${demoStage >= 1 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
+                  <StageIndicator stage={1} current={demoStage} label="低密度像素" icon="🎨" />
+                  <div className={`w-16 h-1 bg-card rounded-full ${demoStage >= 2 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
+                  <StageIndicator stage={2} current={demoStage} label="高密度像素" icon="✨" />
+                </div>
+
+                {/* 控制按钮 */}
+                <div className="text-center">
+                  <button
+                    onClick={playDemoAnimation}
+                    disabled={isAnimating}
+                    className="btn-gradient px-8 py-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isAnimating ? '🎬 演示中...' : '▶️ 播放演示动画'}
+                  </button>
+                  <p className="text-text-muted text-sm mt-4">
+                    点击播放，观看从原图到像素艺术的变换过程
+                  </p>
+                </div>
+
+                {/* 说明文字 */}
+                <div className="grid md:grid-cols-3 gap-4 mt-8 pt-8 border-t border-border/50">
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🖼️</div>
+                    <div className="font-bold text-text-primary mb-1">原图</div>
+                    <div className="text-text-muted text-xs">梵高自画像（1887）</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🎨</div>
+                    <div className="font-bold text-text-primary mb-1">8×8 网格</div>
+                    <div className="text-text-muted text-xs">低密度，强像素感，卡通风格</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">✨</div>
+                    <div className="font-bold text-text-primary mb-1">32×32 网格</div>
+                    <div className="text-text-muted text-xs">高密度，细节保留，艺术感</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -329,29 +474,33 @@ export default function PixelArtPage() {
   )
 }
 
-// 演示卡片组件
-function DemoCard({ title, image, description, tag, pixelSize }: {
-  title: string
-  image: string
-  description: string
-  tag: string
-  pixelSize?: number
+// 阶段指示器组件
+function StageIndicator({ stage, current, label, icon }: {
+  stage: number
+  current: number
+  label: string
+  icon: string
 }) {
+  const isActive = current === stage
+  const isCompleted = current > stage
+
   return (
-    <div className="card glow-border rounded-xl overflow-hidden">
-      <div className="aspect-square bg-card flex items-center justify-center p-4">
-        <img
-          src={image}
-          alt={title}
-          className="max-w-full max-h-full object-contain rounded-lg"
-        />
+    <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${
+      isActive ? 'scale-110' : isCompleted ? 'opacity-70' : 'opacity-40'
+    }`}>
+      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl transition-all duration-500 ${
+        isActive 
+          ? 'bg-gradient-to-r from-neon-cyan to-neon-purple shadow-lg shadow-neon-cyan/50' 
+          : isCompleted
+          ? 'bg-neon-cyan/20 border-2 border-neon-cyan/50'
+          : 'bg-card border-2 border-border'
+      }`}>
+        {icon}
       </div>
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="font-bold text-text-primary">{title}</h4>
-          <span className="tag text-xs">{tag}</span>
-        </div>
-        <p className="text-text-secondary text-sm">{description}</p>
+      <div className={`text-sm font-medium transition-colors ${
+        isActive ? 'text-neon-cyan' : 'text-text-muted'
+      }`}>
+        {label}
       </div>
     </div>
   )
