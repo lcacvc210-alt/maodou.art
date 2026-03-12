@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Upload, Download, Image, Grid3X3, Sliders, Sparkles, RefreshCw } from 'lucide-react'
 
@@ -13,10 +13,7 @@ export default function PixelArtPage() {
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showGrid, setShowGrid] = useState(false)
-  const [isDemoAnimating, setIsDemoAnimating] = useState(false)
-  const [demoStage, setDemoStage] = useState(0)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const demoCanvasRef = useRef<HTMLCanvasElement>(null)
 
   // 处理图片上传
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,127 +104,6 @@ export default function PixelArtPage() {
     setShowGrid(!showGrid)
   }
 
-  // 演示动画
-  const playDemoAnimation = () => {
-    if (!demoCanvasRef.current || isDemoAnimating) return
-    setIsDemoAnimating(true)
-    setDemoStage(0)
-
-    const canvas = demoCanvasRef.current
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const img = document.createElement('img')
-    img.crossOrigin = 'anonymous'
-    img.onload = () => {
-      // 阶段 1：显示原图（2 秒）
-      canvas.width = 400
-      canvas.height = 400
-      ctx.drawImage(img, 0, 0, 400, 400)
-      
-      setTimeout(() => {
-        // 阶段 2：网格分割动画（1.5 秒）
-        setDemoStage(1)
-        animateGrid(ctx, 400, 400, 35, () => {
-          // 阶段 3：像素化处理（2 秒）
-          setDemoStage(2)
-          pixelateDemo(ctx, img, 400, 400, 35, () => {
-            // 阶段 4：完成（1 秒）
-            setDemoStage(3)
-            setTimeout(() => {
-              setIsDemoAnimating(false)
-            }, 1000)
-          })
-        })
-      }, 2000)
-    }
-    img.src = DEMO_IMAGE_URL
-  }
-
-  // 网格分割动画
-  const animateGrid = (ctx: CanvasRenderingContext2D, width: number, height: number, gridSize: number, callback: () => void) => {
-    const blockSize = width / gridSize
-    let progress = 0
-    const animate = () => {
-      progress += 0.03
-      if (progress >= 1) {
-        callback()
-        return
-      }
-
-      // 绘制网格线
-      ctx.strokeStyle = `rgba(6, 182, 212, ${progress})`
-      ctx.lineWidth = 1
-      for (let y = 0; y <= height; y += blockSize) {
-        ctx.beginPath()
-        ctx.moveTo(0, y)
-        ctx.lineTo(width, y)
-        ctx.stroke()
-      }
-      for (let x = 0; x <= width; x += blockSize) {
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, height)
-        ctx.stroke()
-      }
-
-      requestAnimationFrame(animate)
-    }
-    animate()
-  }
-
-  // 演示像素化
-  const pixelateDemo = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, width: number, height: number, gridSize: number, callback: () => void) => {
-    const blockSize = Math.floor(width / gridSize)
-    let currentBlock = 0
-    const totalBlocks = gridSize * gridSize
-
-    const processNextBlock = () => {
-      if (currentBlock >= totalBlocks) {
-        callback()
-        return
-      }
-
-      const row = Math.floor(currentBlock / gridSize)
-      const col = currentBlock % gridSize
-      const x = col * blockSize
-      const y = row * blockSize
-
-      const tempCanvas = document.createElement('canvas')
-      const tempCtx = tempCanvas.getContext('2d')
-      if (tempCtx) {
-        tempCanvas.width = blockSize
-        tempCanvas.height = blockSize
-        tempCtx.drawImage(img, x, y, blockSize, blockSize, 0, 0, blockSize, blockSize)
-        
-        const imageData = tempCtx.getImageData(0, 0, blockSize, blockSize)
-        const data = imageData.data
-        
-        let r = 0, g = 0, b = 0, count = 0
-        for (let i = 0; i < data.length; i += 4) {
-          r += data[i]
-          g += data[i + 1]
-          b += data[i + 2]
-          count++
-        }
-        
-        if (count > 0) {
-          r = Math.round(r / count)
-          g = Math.round(g / count)
-          b = Math.round(b / count)
-          
-          ctx.fillStyle = `rgb(${r},${g},${b})`
-          ctx.fillRect(x, y, blockSize, blockSize)
-        }
-      }
-
-      currentBlock++
-      setTimeout(processNextBlock, 15)
-    }
-
-    processNextBlock()
-  }
-
   return (
     <div className="min-h-screen bg-background relative">
       {/* 背景效果 */}
@@ -258,52 +134,84 @@ export default function PixelArtPage() {
             </p>
           </div>
 
-          {/* 演示区域 */}
+          {/* 演示区域 - 三图并排 */}
           {!uploadedImage && (
             <div className="mb-12">
-              <div className="text-center mb-6">
+              <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold gradient-text mb-2">
                   🎨 效果演示
                 </h2>
                 <p className="text-text-secondary">
-                  以《戴珍珠耳环的少女》为例，看看像素化过程
+                  以《戴珍珠耳环的少女》为例
                 </p>
               </div>
 
-              <div className="card glow-border rounded-2xl p-8 max-w-4xl mx-auto">
-                {/* 演示画布 */}
-                <div className="aspect-video bg-card/50 rounded-xl overflow-hidden mb-6 flex items-center justify-center">
-                  <canvas
-                    ref={demoCanvasRef}
-                    width={400}
-                    height={400}
-                    className="max-w-full max-h-full object-contain"
-                  />
+              <div className="card glow-border rounded-2xl p-8 max-w-5xl mx-auto">
+                {/* 三图并排 */}
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  {/* 原图 */}
+                  <div className="text-center">
+                    <div className="aspect-square bg-card/50 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-2">
+                      <img
+                        src={DEMO_IMAGE_URL}
+                        alt="原图"
+                        className="w-full h-full object-contain"
+                        crossOrigin="anonymous"
+                      />
+                    </div>
+                    <div className="font-bold text-text-primary">原图</div>
+                    <div className="text-text-muted text-xs mt-1">800×800</div>
+                  </div>
+
+                  {/* 箭头 */}
+                  <div className="flex items-center justify-center">
+                    <svg className="w-12 h-12 text-neon-cyan" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                  </div>
+
+                  {/* 低像素 */}
+                  <div className="text-center">
+                    <div className="aspect-square bg-card/50 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-2">
+                      <DemoPixelCanvas imageUrl={DEMO_IMAGE_URL} pixelSize={8} />
+                    </div>
+                    <div className="font-bold text-text-primary">低像素</div>
+                    <div className="text-text-muted text-xs mt-1">8×8 网格</div>
+                  </div>
+
+                  {/* 箭头 */}
+                  <div className="flex items-center justify-center">
+                    <svg className="w-12 h-12 text-neon-purple" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                  </div>
+
+                  {/* 高像素 */}
+                  <div className="text-center">
+                    <div className="aspect-square bg-card/50 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-2">
+                      <DemoPixelCanvas imageUrl={DEMO_IMAGE_URL} pixelSize={32} />
+                    </div>
+                    <div className="font-bold text-text-primary">高像素</div>
+                    <div className="text-text-muted text-xs mt-1">32×32 网格</div>
+                  </div>
                 </div>
 
-                {/* 阶段指示器 */}
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <StageIndicator stage={0} current={demoStage} label="原图" icon="🖼️" />
-                  <div className={`w-12 h-1 bg-card rounded-full transition-all ${demoStage >= 1 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
-                  <StageIndicator stage={1} current={demoStage} label="网格分割" icon="⊞" />
-                  <div className={`w-12 h-1 bg-card rounded-full transition-all ${demoStage >= 2 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
-                  <StageIndicator stage={2} current={demoStage} label="像素化" icon="🎨" />
-                  <div className={`w-12 h-1 bg-card rounded-full transition-all ${demoStage >= 3 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
-                  <StageIndicator stage={3} current={demoStage} label="完成" icon="✨" />
-                </div>
-
-                {/* 控制按钮 */}
+                {/* 说明文字 */}
                 <div className="text-center">
-                  <button
-                    onClick={playDemoAnimation}
-                    disabled={isDemoAnimating}
-                    className="btn-gradient px-8 py-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isDemoAnimating ? '🎬 演示中...' : '▶️ 播放演示动画'}
-                  </button>
-                  <p className="text-text-muted text-sm mt-4">
-                    点击播放，观看从原图到像素艺术的变换过程
+                  <p className="text-text-secondary mb-4">
+                    上传图片，选择像素密度，一键生成像素风效果
                   </p>
+                  <div className="flex justify-center gap-8 text-sm">
+                    <div className="text-text-muted">
+                      <span className="text-neon-cyan font-bold">4×4 - 8×8</span> 强像素感
+                    </div>
+                    <div className="text-text-muted">
+                      <span className="text-neon-purple font-bold">16×16 - 32×32</span> 平衡细节
+                    </div>
+                    <div className="text-text-muted">
+                      <span className="text-neon-pink font-bold">48×48 - 64×64</span> 细节丰富
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -483,34 +391,70 @@ export default function PixelArtPage() {
   )
 }
 
-// 阶段指示器组件
-function StageIndicator({ stage, current, label, icon }: {
-  stage: number
-  current: number
-  label: string
-  icon: string
+// 演示像素画布组件
+function DemoPixelCanvas({ imageUrl, pixelSize }: {
+  imageUrl: string
+  pixelSize: number
 }) {
-  const isActive = current === stage
-  const isCompleted = current > stage
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!canvasRef.current) return
+
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = document.createElement('img')
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      canvas.width = 200
+      canvas.height = 200
+      
+      const blockSize = Math.floor(200 / pixelSize)
+      
+      for (let y = 0; y < 200; y += blockSize) {
+        for (let x = 0; x < 200; x += blockSize) {
+          const tempCanvas = document.createElement('canvas')
+          const tempCtx = tempCanvas.getContext('2d')
+          if (!tempCtx) continue
+          
+          tempCanvas.width = blockSize
+          tempCanvas.height = blockSize
+          tempCtx.drawImage(img, x, y, blockSize, blockSize, 0, 0, blockSize, blockSize)
+          
+          const imageData = tempCtx.getImageData(0, 0, blockSize, blockSize)
+          const data = imageData.data
+          
+          let r = 0, g = 0, b = 0, count = 0
+          for (let i = 0; i < data.length; i += 4) {
+            r += data[i]
+            g += data[i + 1]
+            b += data[i + 2]
+            count++
+          }
+          
+          if (count > 0) {
+            r = Math.round(r / count)
+            g = Math.round(g / count)
+            b = Math.round(b / count)
+            
+            ctx.fillStyle = `rgb(${r},${g},${b})`
+            ctx.fillRect(x, y, blockSize, blockSize)
+          }
+        }
+      }
+    }
+    img.src = imageUrl
+  }, [imageUrl, pixelSize])
 
   return (
-    <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${
-      isActive ? 'scale-110' : isCompleted ? 'opacity-70' : 'opacity-40'
-    }`}>
-      <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-all duration-500 ${
-        isActive 
-          ? 'bg-gradient-to-r from-neon-cyan to-neon-purple shadow-lg shadow-neon-cyan/50' 
-          : isCompleted
-          ? 'bg-neon-cyan/20 border-2 border-neon-cyan/50'
-          : 'bg-card border-2 border-border'
-      }`}>
-        {icon}
-      </div>
-      <div className={`text-xs font-medium transition-colors ${
-        isActive ? 'text-neon-cyan' : 'text-text-muted'
-      }`}>
-        {label}
-      </div>
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={200}
+      height={200}
+      className="w-full h-full object-contain"
+      style={{ imageRendering: 'pixelated' }}
+    />
   )
 }
