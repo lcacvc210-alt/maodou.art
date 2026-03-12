@@ -30,11 +30,11 @@ export default function HomePageContent({ featuredPosts }: HomePageContentProps)
 
       {/* 内容层 */}
       <div className="relative z-10">
-        {/* Hero Section */}
-        <section className="py-20 px-4 sm:py-32 sm:px-6">
+        {/* Hero Section - 缩小间距 */}
+        <section className="py-12 px-4 sm:py-20 sm:px-6">
           <div className="max-w-5xl mx-auto text-center">
             {/* Logo */}
-            <div className="mb-6 sm:mb-8">
+            <div className="mb-4 sm:mb-6">
               <span className="logo text-3xl sm:text-5xl md:text-6xl">
                 {isDark ? (
                   <span className="logo-dark">MAODOU<span className="art">.art</span></span>
@@ -45,17 +45,17 @@ export default function HomePageContent({ featuredPosts }: HomePageContentProps)
             </div>
             
             {/* 主标题 */}
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-4 sm:mb-6 leading-tight px-2">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-3 sm:mb-5 leading-tight px-2">
               毛豆的思考空间
             </h1>
             
-            <p className="text-base sm:text-xl text-text-secondary mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-4">
+            <p className="text-base sm:text-xl text-text-secondary mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
               探索<span className={isDark ? "text-neon-cyan" : "text-blue-600"}>科技前沿</span> · 
               分享<span className={isDark ? "text-neon-purple" : "text-purple-600"}>财经思考</span> · 
               记录<span className={isDark ? "text-neon-pink" : "text-pink-600"}>创业旅程</span>
             </p>
             
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center px-4">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center px-4 mb-8 sm:mb-10">
               <Link
                 href="/blog"
                 className="btn-gradient px-8 py-3 sm:px-10 sm:py-4 rounded-xl font-semibold transition-all duration-300 text-base sm:text-lg w-full sm:w-auto"
@@ -74,8 +74,8 @@ export default function HomePageContent({ featuredPosts }: HomePageContentProps)
               </Link>
             </div>
 
-            {/* 数据展示 */}
-            <div className="grid grid-cols-3 gap-8 mt-20 max-w-2xl mx-auto">
+            {/* 数据展示 - 缩小 */}
+            <div className="grid grid-cols-3 gap-6 sm:gap-8 mt-12 max-w-2xl mx-auto">
               <StatItem number="∞" label="可能性" isDark={isDark} />
               <StatItem number="24/7" label="持续更新" isDark={isDark} />
               <StatItem number="100%" label="用心创作" isDark={isDark} />
@@ -83,56 +83,55 @@ export default function HomePageContent({ featuredPosts }: HomePageContentProps)
           </div>
         </section>
 
-        {/* 分割线 */}
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="divider-glow" />
-        </div>
-
-        {/* Featured Posts */}
-        <section className="py-20 px-6">
+        {/* Featured Posts - 上移并缩小间距 */}
+        <section className="py-12 px-6">
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-12">
-              <h2 className="text-4xl font-bold text-text-primary">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary">
                 <span className="gradient-text">最新文章</span>
               </h2>
               <Link 
                 href="/blog"
-                className={`hover:underline ${isDark ? 'text-neon-cyan' : 'text-blue-600'}`}
+                className={`hover:underline ${isDark ? 'text-neon-cyan' : 'text-blue-600'} text-sm sm:text-base`}
               >
                 查看全部 →
               </Link>
             </div>
             
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {featuredPosts.map((post) => (
                 <Link key={post.slug} href={`/blog/${post.slug}`}>
-                  <article className={`card ${isDark ? 'glow-border' : ''} rounded-2xl p-8 group hover:scale-[1.01] transition-all duration-300`}>
+                  <article className={`card ${isDark ? 'glow-border' : ''} rounded-2xl p-6 group hover:scale-[1.01] transition-all duration-300`}>
                     {/* 顶部光条（仅深色模式） */}
                     {isDark && (
-                      <div className="h-1 w-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink mb-6 rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
+                      <div className="h-1 w-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink mb-5 rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
                     )}
                     
-                    <h2 className={`text-2xl font-bold mb-3 group-hover:text-neon-cyan transition-colors ${
+                    <h2 className={`text-xl font-bold mb-3 line-clamp-2 group-hover:text-neon-cyan transition-colors ${
                       isDark ? 'text-text-primary' : 'text-gray-900'
                     }`}>
                       {post.title}
                     </h2>
-                    <p className="text-text-secondary mb-6 leading-relaxed">
+                    <p className="text-text-secondary mb-5 leading-relaxed line-clamp-3 text-sm">
                       {post.summary}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-sm text-text-muted">
-                        <time className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${isDark ? 'bg-neon-cyan' : 'bg-blue-600'}`} />
+                    
+                    {/* 底部信息 - 分两行显示，避免堆叠 */}
+                    <div className="flex flex-col gap-3">
+                      {/* 第一行：日期和字数 */}
+                      <div className="flex items-center gap-3 text-xs text-text-muted">
+                        <time className="flex items-center gap-1.5">
+                          <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-neon-cyan' : 'bg-blue-600'}`} />
                           {post.date}
                         </time>
-                        <span>·</span>
-                        <span>{post.summary?.length || 500} 字</span>
+                        <span className="text-text-muted/50">·</span>
+                        <span>{Math.ceil((post.summary?.length || 500) / 2)} 字</span>
                       </div>
                       
-                      <div className="flex gap-2">
-                        {post.tags.slice(0, 2).map((tag: string) => (
-                          <span key={tag} className="tag text-xs">
+                      {/* 第二行：标签 */}
+                      <div className="flex gap-2 flex-wrap">
+                        {post.tags.slice(0, 3).map((tag: string) => (
+                          <span key={tag} className="tag text-xs px-2 py-1">
                             {tag}
                           </span>
                         ))}
