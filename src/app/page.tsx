@@ -1,6 +1,16 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from "next/link";
 
 export default function Home() {
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme')
+    setIsDark(saved !== 'light')
+  }, [])
+
   const featuredPosts = [
     {
       slug: "welcome",
@@ -13,49 +23,57 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* 背景效果层 */}
-      <div className="fixed inset-0 pointer-events-none">
-        {/* 网格背景 */}
-        <div className="cyber-grid" />
-        
-        {/* 发光球体 */}
-        <div className="glow-orb glow-orb-1" />
-        <div className="glow-orb glow-orb-2" />
-        <div className="glow-orb glow-orb-3" />
-      </div>
+      {/* 背景效果层（仅深色模式） */}
+      {isDark && (
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="cyber-grid" />
+          <div className="glow-orb glow-orb-1" />
+          <div className="glow-orb glow-orb-2" />
+          <div className="glow-orb glow-orb-3" />
+        </div>
+      )}
 
       {/* 内容层 */}
       <div className="relative z-10">
         {/* Hero Section */}
-        <section className="py-32 px-6">
+        <section className="py-20 px-4 sm:py-32 sm:px-6">
           <div className="max-w-5xl mx-auto text-center">
-            {/* 发光标题 */}
-            <div className="inline-block mb-6">
-              <span className="tag text-sm px-4 py-2">
-                ✨ 欢迎来到 maodou.art
+            {/* Logo */}
+            <div className="mb-6 sm:mb-8">
+              <span className="logo text-3xl sm:text-5xl md:text-6xl">
+                {isDark ? (
+                  <span className="logo-dark">MAODOU<span className="art">.art</span></span>
+                ) : (
+                  <span className="logo-light">MAODOU<span className="art">.art</span></span>
+                )}
               </span>
             </div>
             
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 gradient-text leading-tight">
+            {/* 主标题 */}
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-4 sm:mb-6 leading-tight px-2">
               毛豆的思考空间
             </h1>
             
-            <p className="text-xl text-text-secondary mb-10 max-w-3xl mx-auto leading-relaxed">
-              探索<span className="text-neon-cyan">科技前沿</span> · 
-              分享<span className="text-neon-purple">财经思考</span> · 
-              记录<span className="text-neon-pink">创业旅程</span>
+            <p className="text-base sm:text-xl text-text-secondary mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-4">
+              探索<span className={isDark ? "text-neon-cyan" : "text-blue-600"}>科技前沿</span> · 
+              分享<span className={isDark ? "text-neon-purple" : "text-purple-600"}>财经思考</span> · 
+              记录<span className={isDark ? "text-neon-pink" : "text-pink-600"}>创业旅程</span>
             </p>
             
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center px-4">
               <Link
                 href="/blog"
-                className="btn-gradient px-10 py-4 rounded-xl font-semibold transition-all duration-300 text-lg"
+                className="btn-gradient px-8 py-3 sm:px-10 sm:py-4 rounded-xl font-semibold transition-all duration-300 text-base sm:text-lg w-full sm:w-auto"
               >
                 开始探索 →
               </Link>
               <Link
                 href="/about"
-                className="px-10 py-4 rounded-xl font-semibold border border-border hover:border-neon-cyan/50 transition-all duration-300 bg-card/30 hover:bg-card/50 backdrop-blur-sm"
+                className={`px-8 py-3 sm:px-10 sm:py-4 rounded-xl font-semibold border transition-all duration-300 backdrop-blur-sm text-base sm:text-lg w-full sm:w-auto ${
+                  isDark 
+                    ? 'border-neon-cyan/50 text-white hover:bg-neon-cyan/10 hover:border-neon-cyan' 
+                    : 'border-gray-300 text-gray-700 hover:border-blue-400 bg-white hover:bg-blue-50'
+                }`}
               >
                 了解更多
               </Link>
@@ -63,9 +81,9 @@ export default function Home() {
 
             {/* 数据展示 */}
             <div className="grid grid-cols-3 gap-8 mt-20 max-w-2xl mx-auto">
-              <StatItem number="∞" label="可能性" />
-              <StatItem number="24/7" label="持续更新" />
-              <StatItem number="100%" label="用心创作" />
+              <StatItem number="∞" label="可能性" isDark={isDark} />
+              <StatItem number="24/7" label="持续更新" isDark={isDark} />
+              <StatItem number="100%" label="用心创作" isDark={isDark} />
             </div>
           </div>
         </section>
@@ -84,7 +102,7 @@ export default function Home() {
               </h2>
               <Link 
                 href="/blog"
-                className="text-neon-cyan hover:text-neon-cyan/80 transition-colors flex items-center gap-2"
+                className={`hover:underline ${isDark ? 'text-neon-cyan' : 'text-blue-600'}`}
               >
                 查看全部 →
               </Link>
@@ -93,26 +111,33 @@ export default function Home() {
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {featuredPosts.map((post) => (
                 <Link key={post.slug} href={`/blog/${post.slug}`}>
-                  <article className="card glow-border rounded-2xl p-8 h-full group">
-                    {/* 卡片顶部光条 */}
-                    <div className="h-1 w-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink mb-6 rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
+                  <article className={`card ${isDark ? 'glow-border' : ''} rounded-2xl p-8 group hover:scale-[1.01] transition-all duration-300`}>
+                    {/* 顶部光条（仅深色模式） */}
+                    {isDark && (
+                      <div className="h-1 w-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink mb-6 rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
+                    )}
                     
-                    <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-neon-cyan transition-colors">
+                    <h2 className={`text-2xl font-bold mb-3 group-hover:text-neon-cyan transition-colors ${
+                      isDark ? 'text-text-primary' : 'text-gray-900'
+                    }`}>
                       {post.title}
-                    </h3>
-                    <p className="text-text-secondary text-sm mb-6 leading-relaxed">
+                    </h2>
+                    <p className="text-text-secondary mb-6 leading-relaxed">
                       {post.summary}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-xs text-text-muted">
-                        <time className="flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan" />
+                      <div className="flex items-center gap-4 text-sm text-text-muted">
+                        <time className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isDark ? 'bg-neon-cyan' : 'bg-blue-600'}`} />
                           {post.date}
                         </time>
+                        <span>·</span>
+                        <span>{post.content?.length || 500} 字</span>
                       </div>
+                      
                       <div className="flex gap-2">
-                        {post.tags.slice(0, 2).map((tag) => (
-                          <span key={tag} className="tag">
+                        {post.tags.slice(0, 2).map((tag: string) => (
+                          <span key={tag} className="tag text-xs">
                             {tag}
                           </span>
                         ))}
@@ -141,18 +166,21 @@ export default function Home() {
                 title="财经思考"
                 description="市场观察、投资心得、理财经验分享，用数据说话"
                 gradient="from-neon-cyan to-neon-blue"
+                isDark={isDark}
               />
               <FeatureCard
                 icon="🤖"
                 title="科技前沿"
                 description="AI 新工具、新技术解读、数字化转型趋势分析"
                 gradient="from-neon-purple to-neon-pink"
+                isDark={isDark}
               />
               <FeatureCard
                 icon="🎨"
                 title="艺术与生活"
                 description="美好事物记录、创意工具分享、生活感悟与思考"
                 gradient="from-neon-green to-neon-cyan"
+                isDark={isDark}
               />
             </div>
           </div>
@@ -175,6 +203,7 @@ export default function Home() {
                 description="生成高级感配色方案，支持导出 CSS 变量、Tailwind 配置"
                 href="/tools/color-palette"
                 features={["智能配色", "一键导出", "多格式支持"]}
+                isDark={isDark}
               />
               <ToolCard
                 icon="🕹️"
@@ -182,6 +211,7 @@ export default function Home() {
                 description="上传图片转 8bit 风格，可调节像素大小，支持批量处理"
                 href="/tools/pixel-art"
                 features={["8bit 风格", "自定义像素", "批量处理"]}
+                isDark={isDark}
               />
             </div>
           </div>
@@ -190,9 +220,11 @@ export default function Home() {
         {/* CTA Section */}
         <section className="py-20 px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="card glow-border rounded-3xl p-12 relative overflow-hidden">
-              {/* 背景光效 */}
-              <div className="absolute inset-0 bg-gradient-to-r from-neon-cyan/10 via-neon-purple/10 to-neon-pink/10" />
+            <div className={`card ${isDark ? 'glow-border' : ''} rounded-3xl p-12 relative overflow-hidden`}>
+              {/* 背景光效（仅深色模式） */}
+              {isDark && (
+                <div className="absolute inset-0 bg-gradient-to-r from-neon-cyan/10 via-neon-purple/10 to-neon-pink/10" />
+              )}
               
               <div className="relative z-10">
                 <h2 className="text-4xl font-bold mb-6 gradient-text">
@@ -210,7 +242,11 @@ export default function Home() {
                   </Link>
                   <Link
                     href="/tools"
-                    className="px-10 py-4 rounded-xl font-semibold border border-border hover:border-neon-cyan/50 transition-all duration-300 bg-card/30"
+                    className={`px-10 py-4 rounded-xl font-semibold border transition-all duration-300 ${
+                      isDark 
+                        ? 'border-border hover:border-neon-cyan/50 bg-card/30' 
+                        : 'border-gray-300 hover:border-blue-400 bg-white'
+                    }`}
                   >
                     试试工具
                   </Link>
@@ -221,7 +257,7 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="py-12 px-6 border-t border-border/50">
+        <footer className={`py-12 px-6 border-t ${isDark ? 'border-border/50' : 'border-gray-200'}`}>
           <div className="max-w-6xl mx-auto text-center text-text-muted">
             <p className="mb-2">
               © 2026 毛豆的思考空间 | maodou.art
@@ -237,7 +273,7 @@ export default function Home() {
 }
 
 // 统计项组件
-function StatItem({ number, label }: { number: string; label: string }) {
+function StatItem({ number, label, isDark }: { number: string; label: string; isDark: boolean }) {
   return (
     <div className="text-center">
       <div className="text-3xl font-bold gradient-text mb-1">{number}</div>
@@ -251,19 +287,23 @@ function FeatureCard({
   icon, 
   title, 
   description, 
-  gradient 
+  gradient,
+  isDark
 }: { 
   icon: string; 
   title: string; 
   description: string; 
   gradient: string;
+  isDark: boolean;
 }) {
   return (
-    <div className="card glow-border rounded-2xl p-8 group hover:scale-105 transition-transform duration-300">
+    <div className={`card ${isDark ? 'glow-border' : ''} rounded-2xl p-8 group hover:scale-105 transition-transform duration-300`}>
       <div className={`text-5xl mb-6 bg-gradient-to-r ${gradient} w-16 h-16 rounded-2xl flex items-center justify-center`}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-text-primary mb-3 group-hover:text-neon-cyan transition-colors">
+      <h3 className={`text-xl font-bold mb-3 group-hover:text-neon-cyan transition-colors ${
+        isDark ? 'text-text-primary' : 'text-gray-900'
+      }`}>
         {title}
       </h3>
       <p className="text-text-secondary leading-relaxed">
@@ -279,24 +319,30 @@ function ToolCard({
   title,
   description,
   href,
-  features
+  features,
+  isDark
 }: {
   icon: string;
   title: string;
   description: string;
   href: string;
   features: string[];
+  isDark: boolean;
 }) {
   return (
     <Link href={href}>
-      <div className="card glow-border rounded-2xl p-8 group hover:scale-[1.02] transition-all duration-300">
+      <div className={`card ${isDark ? 'glow-border' : ''} rounded-2xl p-8 group hover:scale-[1.02] transition-all duration-300`}>
         <div className="flex items-start justify-between mb-6">
           <div className="text-4xl">{icon}</div>
-          <div className="text-neon-cyan opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+            isDark ? 'text-neon-cyan' : 'text-blue-600'
+          }`}>
             →
           </div>
         </div>
-        <h3 className="text-2xl font-bold text-text-primary mb-3 group-hover:text-neon-cyan transition-colors">
+        <h3 className={`text-2xl font-bold mb-3 group-hover:text-neon-cyan transition-colors ${
+          isDark ? 'text-text-primary' : 'text-gray-900'
+        }`}>
           {title}
         </h3>
         <p className="text-text-secondary mb-6 leading-relaxed">

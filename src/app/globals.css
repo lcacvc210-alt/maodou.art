@@ -1,32 +1,10 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* 赛博霓虹风 - 浅色模式 */
-  --background: #0a0e1a;
-  --background-dark: #050810;
-  --background-card: #111827;
-  --background-card-hover: #1a2332;
-  --border-color: #1e293b;
-  --border-glow: #00f0ff;
-  --text-primary: #f0f9ff;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
-  --foreground: #f0f9ff;
-  
-  /* 赛博霓虹色 */
-  --neon-cyan: #00f0ff;
-  --neon-pink: #ff00ff;
-  --neon-purple: #7b2cbf;
-  --neon-blue: #3b82f6;
-  --neon-green: #00ff88;
-  
-  /* 渐变配置 */
-  --gradient-main: linear-gradient(135deg, #00f0ff 0%, #7b2cbf 50%, #ff00ff 100%);
-  --gradient-glow: linear-gradient(135deg, rgba(0,240,255,0.3) 0%, rgba(123,44,191,0.3) 50%, rgba(255,0,255,0.3) 100%);
-}
-
-.dark {
-  /* 赛博霓虹风 - 深色模式（更强烈） */
+  /* ===========================
+     深色模式 - 赛博霓虹风
+     =========================== */
   --background: #030610;
   --background-dark: #000205;
   --background-card: #0d1117;
@@ -37,6 +15,52 @@
   --text-secondary: #9ca3af;
   --text-muted: #4b5563;
   --foreground: #ffffff;
+  
+  /* 赛博霓虹色 */
+  --neon-cyan: #00f0ff;
+  --neon-pink: #ff00ff;
+  --neon-purple: #7b2cbf;
+  --neon-blue: #3b82f6;
+  --neon-green: #00ff88;
+  
+  /* Logo 配色 - 深色背景 */
+  --logo-gradient-dark: linear-gradient(135deg, #00f0ff 0%, #7b2cbf 50%, #ff00ff 100%);
+  --logo-text-dark: #94a3b8;
+  
+  /* 渐变配置 */
+  --gradient-main: linear-gradient(135deg, #00f0ff 0%, #7b2cbf 50%, #ff00ff 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(0,240,255,0.3) 0%, rgba(123,44,191,0.3) 50%, rgba(255,0,255,0.3) 100%);
+}
+
+.light {
+  /* ===========================
+     浅色模式 - 苹果商务风
+     =========================== */
+  --background: #ffffff;
+  --background-dark: #f5f5f7;
+  --background-card: #ffffff;
+  --background-card-hover: #fafafa;
+  --border-color: #e5e5e5;
+  --border-glow: #0066cc;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-muted: #86868b;
+  --foreground: #1d1d1f;
+  
+  /* 苹果风强调色 */
+  --neon-cyan: #0066cc;
+  --neon-pink: #ff2d55;
+  --neon-purple: #5e5ce6;
+  --neon-blue: #007aff;
+  --neon-green: #34c759;
+  
+  /* Logo 配色 - 浅色背景 */
+  --logo-gradient-light: linear-gradient(135deg, #0066cc 0%, #5e5ce6 50%, #ff2d55 100%);
+  --logo-text-light: #86868b;
+  
+  /* 渐变配置 */
+  --gradient-main: linear-gradient(135deg, #0066cc 0%, #5e5ce6 50%, #ff2d55 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(0,102,204,0.1) 0%, rgba(94,92,230,0.1) 50%, rgba(255,45,85,0.1) 100%);
 }
 
 @theme inline {
@@ -57,20 +81,90 @@
   --color-neon-blue: var(--neon-blue);
   --color-neon-green: var(--neon-green);
   
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Logo 色 */
+  --color-logo-text-dark: var(--logo-text-dark);
+  --color-logo-text-light: var(--logo-text-light);
+  
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  
+  /* Logo 字体 */
+  --font-logo: 'Montserrat', sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--text-primary);
-  font-family: Arial, Helvetica, sans-serif;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 动态网格背景 */
-.cyber-grid {
+/* ===========================
+   Logo 专业样式
+   =========================== */
+
+.logo {
+  font-family: var(--font-logo);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+/* 深色背景 Logo（主版本） */
+.logo-dark {
+  background: var(--logo-gradient-dark);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.logo-dark .art {
+  color: var(--logo-text-dark);
+  font-weight: 400;
+  -webkit-text-fill-color: var(--logo-text-dark);
+}
+
+/* 浅色背景 Logo（苹果风） */
+.logo-light {
+  background: var(--logo-gradient-light);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.logo-light .art {
+  color: var(--logo-text-light);
+  font-weight: 400;
+  -webkit-text-fill-color: var(--logo-text-light);
+}
+
+/* Logo 悬停效果 */
+.logo:hover {
+  opacity: 0.85;
+  transform: translateX(2px);
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===========================
+   背景效果（仅深色模式）
+   =========================== */
+
+.dark .cyber-grid {
   position: fixed;
   top: 0;
   left: 0;
@@ -85,19 +179,66 @@ body {
   animation: grid-move 20s linear infinite;
 }
 
+.dark .glow-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+  animation: orb-float 8s ease-in-out infinite;
+}
+
+.dark .glow-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--neon-cyan);
+  top: -200px;
+  right: -200px;
+  animation-delay: 0s;
+}
+
+.dark .glow-orb-2 {
+  width: 300px;
+  height: 300px;
+  background: var(--neon-purple);
+  bottom: -150px;
+  left: -150px;
+  animation-delay: 4s;
+}
+
+.dark .glow-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: var(--neon-pink);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: 2s;
+}
+
 @keyframes grid-move {
   0% { transform: translate(0, 0); }
   100% { transform: translate(50px, 50px); }
 }
 
-/* 发光边框效果 */
-.glow-border {
+@keyframes orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* ===========================
+   发光边框（仅深色模式）
+   =========================== */
+
+.dark .glow-border {
   position: relative;
   border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
-.glow-border::before {
+.dark .glow-border::before {
   content: '';
   position: absolute;
   top: 0;
@@ -113,11 +254,11 @@ body {
   transition: left 0.5s ease;
 }
 
-.glow-border:hover::before {
+.dark .glow-border:hover::before {
   left: 100%;
 }
 
-.glow-border:hover {
+.dark .glow-border:hover {
   border-color: var(--neon-cyan);
   box-shadow: 
     0 0 20px rgba(0, 240, 255, 0.3),
@@ -125,40 +266,27 @@ body {
     inset 0 0 20px rgba(0, 240, 255, 0.05);
 }
 
-/* 渐变文字效果 */
-.gradient-text {
-  background: var(--gradient-main);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  background-size: 200% 200%;
-  animation: gradient-shift 3s ease infinite;
+/* 浅色模式卡片 - 苹果风阴影 */
+.light .card {
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.light .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.08),
+    0 4px 8px rgba(0, 0, 0, 0.04);
+  border-color: var(--neon-blue);
 }
 
-/* 霓虹发光文字 */
-.neon-text {
-  color: var(--neon-cyan);
-  text-shadow: 
-    0 0 10px rgba(0, 240, 255, 0.8),
-    0 0 20px rgba(0, 240, 255, 0.6),
-    0 0 30px rgba(0, 240, 255, 0.4),
-    0 0 40px rgba(0, 240, 255, 0.2);
-  animation: neon-flicker 2s ease-in-out infinite;
-}
-
-@keyframes neon-flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.95; }
-}
-
-/* 卡片样式 - 玻璃态 */
-.card {
+/* 深色模式卡片 */
+.dark .card {
   background: linear-gradient(
     135deg,
     rgba(17, 24, 39, 0.8) 0%,
@@ -168,11 +296,9 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 16px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
 }
 
-.card::before {
+.dark .card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -187,7 +313,7 @@ body {
   );
 }
 
-.card:hover {
+.dark .card:hover {
   transform: translateY(-4px);
   border-color: var(--neon-cyan);
   box-shadow: 
@@ -196,13 +322,30 @@ body {
     inset 0 0 20px rgba(0, 240, 255, 0.05);
 }
 
-/* 按钮渐变 + 发光 */
+/* ===========================
+   渐变文字
+   =========================== */
+
+.gradient-text {
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* ===========================
+   按钮渐变
+   =========================== */
+
 .btn-gradient {
   background: var(--gradient-main);
   color: white;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  font-weight: 600;
 }
 
 .btn-gradient::before {
@@ -229,30 +372,62 @@ body {
   opacity: 0.9;
   transform: translateY(-2px);
   box-shadow: 
-    0 10px 30px rgba(0, 240, 255, 0.4),
-    0 0 20px rgba(123, 44, 191, 0.3);
+    0 10px 30px rgba(0, 102, 204, 0.3),
+    0 0 20px rgba(94, 92, 230, 0.2);
 }
 
-/* 标签样式 */
+/* ===========================
+   标签样式
+   =========================== */
+
 .tag {
-  background: rgba(0, 240, 255, 0.1);
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: rgba(0, 102, 204, 0.08);
+  border: 1px solid rgba(0, 102, 204, 0.2);
   color: var(--neon-cyan);
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
   transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.02em;
+  font-weight: 500;
 }
 
 .tag:hover {
+  background: rgba(0, 102, 204, 0.12);
+  border-color: var(--neon-cyan);
+}
+
+.dark .tag {
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: var(--neon-cyan);
+}
+
+.dark .tag:hover {
   background: rgba(0, 240, 255, 0.2);
   border-color: var(--neon-cyan);
   box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
 }
 
-/* 分割线发光 */
+/* ===========================
+   分割线
+   =========================== */
+
 .divider-glow {
   height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 102, 204, 0.3),
+    rgba(94, 92, 230, 0.3),
+    rgba(255, 45, 85, 0.3),
+    transparent
+  );
+  margin: 2rem 0;
+}
+
+.dark .divider-glow {
   background: linear-gradient(
     90deg,
     transparent,
@@ -261,10 +436,12 @@ body {
     rgba(255, 0, 255, 0.5),
     transparent
   );
-  margin: 2rem 0;
 }
 
-/* 滚动条美化 */
+/* ===========================
+   滚动条美化
+   =========================== */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -283,13 +460,24 @@ body {
   background: linear-gradient(180deg, var(--neon-pink), var(--neon-purple));
 }
 
-/* 选中文本 */
+/* ===========================
+   选中文本
+   =========================== */
+
 ::selection {
+  background: rgba(0, 102, 204, 0.2);
+  color: var(--text-primary);
+}
+
+.dark ::selection {
   background: rgba(0, 240, 255, 0.3);
   color: var(--text-primary);
 }
 
-/* 链接悬停发光 */
+/* ===========================
+   链接
+   =========================== */
+
 a {
   position: relative;
   transition: color 0.3s ease;
@@ -299,47 +487,64 @@ a:hover {
   color: var(--neon-cyan);
 }
 
-/* 光晕背景装饰 */
-.glow-orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.15;
-  pointer-events: none;
-  z-index: 0;
-  animation: orb-float 8s ease-in-out infinite;
+/* ===========================
+   排版优化
+   =========================== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.glow-orb-1 {
-  width: 400px;
-  height: 400px;
-  background: var(--neon-cyan);
-  top: -200px;
-  right: -200px;
-  animation-delay: 0s;
+p {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
 }
 
-.glow-orb-2 {
-  width: 300px;
-  height: 300px;
-  background: var(--neon-purple);
-  bottom: -150px;
-  left: -150px;
-  animation-delay: 4s;
+/* ===========================
+   导航栏 - 苹果风毛玻璃
+   =========================== */
+
+header {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glow-orb-3 {
-  width: 250px;
-  height: 250px;
-  background: var(--neon-pink);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation-delay: 2s;
+.light header {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
-@keyframes orb-float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
+.dark header {
+  background: rgba(3, 6, 16, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+/* ===========================
+   响应式优化
+   =========================== */
+
+@media (max-width: 768px) {
+  .logo {
+    font-size: 1.25rem;
+    letter-spacing: 0.03em;
+  }
+  
+  .dark .cyber-grid {
+    background-size: 30px 30px;
+  }
+}
+
+/* ===========================
+   日夜模式过渡动画
+   =========================== */
+
+* {
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }

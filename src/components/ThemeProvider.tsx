@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState(true)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -13,15 +13,18 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     if (saved) {
       setIsDark(saved === 'dark')
     } else {
-      setIsDark(window.matchMedia('(prefers-color-scheme: dark)').matches)
+      // 默认深色模式
+      setIsDark(true)
     }
   }, [])
 
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark')
+      document.documentElement.classList.remove('light')
       localStorage.setItem('theme', 'dark')
     } else {
+      document.documentElement.classList.add('light')
       document.documentElement.classList.remove('dark')
       localStorage.setItem('theme', 'light')
     }
