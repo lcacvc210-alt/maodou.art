@@ -149,23 +149,6 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               </Link>
             </div>
           )}
-              <Link href={`/blog/${nextPost.slug}`} className="card glow-border rounded-xl p-6 group hover:border-neon-cyan/50 transition-all md:text-right">
-                <div className="text-text-muted text-sm mb-2">下一篇 →</div>
-                <div className="text-text-primary font-medium group-hover:text-neon-cyan transition-colors line-clamp-1">
-                  {nextPost.title}
-                </div>
-              </Link>
-            )}
-          </div>
-
-          {/* 无文章导航时的提示 */}
-          {!prevPost && !nextPost && (
-            <div className="text-center py-8">
-              <Link href="/blog" className="text-neon-cyan hover:underline">
-                返回文章列表 →
-              </Link>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
