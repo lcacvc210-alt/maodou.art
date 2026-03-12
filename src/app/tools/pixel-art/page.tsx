@@ -356,30 +356,46 @@ function DemoPixelCanvas({ imageUrl, pixelSize }: {
     const img = document.createElement('img')
     img.crossOrigin = 'anonymous'
     img.onload = () => {
-      canvas.width = 200
-      canvas.height = 200
+      canvas.width = 256
+      canvas.height = 256
       
-      const blockSize = Math.floor(200 / pixelSize)
+      // 先绘制原图
+      ctx.drawImage(img, 0, 0, 256, 256)
       
-      for (let y = 0; y < 200; y += blockSize) {
-        for (let x = 0; x < 200; x += blockSize) {
-          const tempCanvas = document.createElement('canvas')
-          const tempCtx = tempCanvas.getContext('2d')
-          if (!tempCtx) continue
+      // 获取像素数据
+      const blockSize = Math.floor(256 / pixelSize)
+      const imageData = ctx.getImageData(0, 0, 256, 256)
+      const data = imageData.data
+      
+      // 创建临时小画布用于取样
+      const tempCanvas = document.createElement('canvas')
+      const tempCtx = tempCanvas.getContext('2d')
+      if (!tempCtx) return
+      
+      tempCanvas.width = blockSize
+      tempCanvas.height = blockSize
+      
+      // 遍历每个像素块
+      for (let blockY = 0; blockY < pixelSize; blockY++) {
+        for (let blockX = 0; blockX < pixelSize; blockX++) {
+          const x = blockX * blockSize
+          const y = blockY * blockSize
           
-          tempCanvas.width = blockSize
-          tempCanvas.height = blockSize
+          // 取样这个块的中心点
+          tempCtx.clearRect(0, 0, blockSize, blockSize)
           tempCtx.drawImage(img, x, y, blockSize, blockSize, 0, 0, blockSize, blockSize)
           
-          const imageData = tempCtx.getImageData(0, 0, blockSize, blockSize)
-          const data = imageData.data
+          const blockData = tempCtx.getImageData(0, 0, blockSize, blockSize)
+          const pixels = blockData.data
           
           let r = 0, g = 0, b = 0, count = 0
-          for (let i = 0; i < data.length; i += 4) {
-            r += data[i]
-            g += data[i + 1]
-            b += data[i + 2]
-            count++
+          for (let i = 0; i < pixels.length; i += 4) {
+            if (pixels[i + 3] > 0) {
+              r += pixels[i]
+              g += pixels[i + 1]
+              b += pixels[i + 2]
+              count++
+            }
           }
           
           if (count > 0) {
@@ -387,6 +403,7 @@ function DemoPixelCanvas({ imageUrl, pixelSize }: {
             g = Math.round(g / count)
             b = Math.round(b / count)
             
+            // 填充这个块
             ctx.fillStyle = `rgb(${r},${g},${b})`
             ctx.fillRect(x, y, blockSize, blockSize)
           }
@@ -399,9 +416,9 @@ function DemoPixelCanvas({ imageUrl, pixelSize }: {
   return (
     <canvas
       ref={canvasRef}
-      width={200}
-      height={200}
-      className="w-full h-full object-contain"
+      width={256}
+      height={256}
+      className="w-full h-full object-cover"
       style={{ imageRendering: 'pixelated' }}
     />
   )
