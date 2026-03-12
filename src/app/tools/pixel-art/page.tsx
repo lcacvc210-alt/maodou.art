@@ -15,15 +15,73 @@ export default function PixelArtPage() {
   const [showGrid, setShowGrid] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
+  // 像素化处理（带指定尺寸）
+  const processImageWithSize = (image: string, size: number) => {
+    if (!canvasRef.current) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = document.createElement('img')
+    img.onload = () => {
+      canvas.width = img.width
+      canvas.height = img.height
+      
+      const blockSize = Math.floor(Math.min(img.width, img.height) / size)
+      
+      for (let y = 0; y < img.height; y += blockSize) {
+        for (let x = 0; x < img.width; x += blockSize) {
+          const tempCanvas = document.createElement('canvas')
+          const tempCtx = tempCanvas.getContext('2d')
+          if (!tempCtx) continue
+          
+          tempCanvas.width = blockSize
+          tempCanvas.height = blockSize
+          tempCtx.drawImage(img, x, y, blockSize, blockSize, 0, 0, blockSize, blockSize)
+          
+          const imageData = tempCtx.getImageData(0, 0, blockSize, blockSize)
+          const data = imageData.data
+          
+          let r = 0, g = 0, b = 0, count = 0
+          for (let i = 0; i < data.length; i += 4) {
+            r += data[i]
+            g += data[i + 1]
+            b += data[i + 2]
+            count++
+          }
+          
+          if (count > 0) {
+            r = Math.round(r / count)
+            g = Math.round(g / count)
+            b = Math.round(b / count)
+            
+            ctx.fillStyle = `rgb(${r},${g},${b})`
+            ctx.fillRect(x, y, blockSize, blockSize)
+          }
+        }
+      }
+
+      setProcessedImage(canvas.toDataURL('image/png'))
+      setIsProcessing(false)
+    }
+    img.src = image
+  }
+
   // 处理图片上传
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
       reader.onload = (event) => {
-        setUploadedImage(event.target?.result as string)
+        const imageUrl = event.target?.result as string
+        setUploadedImage(imageUrl)
         setProcessedImage(null)
         setShowGrid(false)
+        setPixelSize(35) // 默认 35×35（推荐头像）
+        // 自动生成默认像素图
+        setTimeout(() => {
+          processImageWithSize(imageUrl, 35)
+        }, 100)
       }
       reader.readAsDataURL(file)
     }
@@ -136,30 +194,30 @@ export default function PixelArtPage() {
 
           {/* 演示区域 - 极简对比 */}
           {!uploadedImage && (
-            <div className="mb-16">
+            <div className="mb-12">
               <div className="flex items-center justify-center gap-8 max-w-4xl mx-auto">
                 {/* 原图 */}
                 <div className="text-center">
                   <img
                     src={DEMO_IMAGE_URL}
                     alt="原图"
-                    className="w-64 h-64 object-cover rounded-lg shadow-2xl"
+                    className="w-56 h-56 object-cover rounded-lg shadow-2xl"
                     crossOrigin="anonymous"
                   />
-                  <div className="text-2xl font-bold text-text-primary mt-4">原图</div>
+                  <div className="text-xl font-bold text-text-primary mt-3">原图</div>
                 </div>
 
                 {/* 箭头 */}
-                <svg className="w-20 h-20 text-text-muted flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-16 h-16 text-text-muted flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
                 </svg>
 
                 {/* 像素风 */}
                 <div className="text-center">
-                  <div className="w-64 h-64 rounded-lg shadow-2xl overflow-hidden">
+                  <div className="w-56 h-56 rounded-lg shadow-2xl overflow-hidden">
                     <DemoPixelCanvas imageUrl={DEMO_IMAGE_URL} pixelSize={16} />
                   </div>
-                  <div className="text-2xl font-bold text-text-primary mt-4">像素风</div>
+                  <div className="text-xl font-bold text-text-primary mt-3">像素风</div>
                 </div>
               </div>
             </div>
@@ -167,11 +225,11 @@ export default function PixelArtPage() {
 
           {/* 上传区域 */}
           {!uploadedImage ? (
-            <div className="card glow-border rounded-2xl p-16 text-center max-w-2xl mx-auto">
-              <Upload className="w-20 h-20 text-neon-cyan mx-auto mb-6" />
-              <h3 className="text-2xl font-bold text-text-primary mb-3">上传图片开始创作</h3>
-              <p className="text-text-secondary mb-8">支持 JPG、PNG、GIF 格式，最大 10MB</p>
-              <label className="btn-gradient px-10 py-5 rounded-xl font-semibold cursor-pointer inline-block text-lg">
+            <div className="card glow-border rounded-2xl p-12 text-center max-w-2xl mx-auto">
+              <Upload className="w-16 h-16 text-neon-cyan mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-text-primary mb-2">上传图片开始创作</h3>
+              <p className="text-text-secondary mb-6">支持 JPG、PNG、GIF 格式</p>
+              <label className="btn-gradient px-8 py-4 rounded-xl font-semibold cursor-pointer inline-block">
                 选择图片
                 <input
                   type="file"
@@ -180,17 +238,16 @@ export default function PixelArtPage() {
                   className="hidden"
                 />
               </label>
-              <p className="text-text-muted text-sm mt-4">或拖拽图片到此处</p>
             </div>
           ) : (
             <>
               {/* 图片对比区 */}
-              <div className="grid lg:grid-cols-2 gap-6 mb-8">
+              <div className="grid lg:grid-cols-2 gap-4">
                 {/* 原图 */}
                 <div className="card glow-border rounded-2xl overflow-hidden">
-                  <div className="flex items-center justify-between p-4 border-b border-border/50">
+                  <div className="flex items-center justify-between p-3 border-b border-border/50">
                     <div className="flex items-center gap-2">
-                      <Image className="w-5 h-5 text-neon-cyan" />
+                      <Image className="w-4 h-4 text-neon-cyan" />
                       <span className="font-bold text-text-primary">原图</span>
                     </div>
                     <button
@@ -200,7 +257,7 @@ export default function PixelArtPage() {
                       更换图片
                     </button>
                   </div>
-                  <div className="aspect-square bg-card/50 flex items-center justify-center p-4">
+                  <div className="aspect-square bg-card/50 flex items-center justify-center p-3">
                     <img
                       src={uploadedImage}
                       alt="Original"
@@ -215,22 +272,22 @@ export default function PixelArtPage() {
                     ? 'glow-border border-neon-cyan/50' 
                     : 'border-border/50'
                 }`}>
-                  <div className="flex items-center justify-between p-4 border-b border-border/50">
+                  <div className="flex items-center justify-between p-3 border-b border-border/50">
                     <div className="flex items-center gap-2">
-                      <Grid3X3 className="w-5 h-5 text-neon-purple" />
+                      <Grid3X3 className="w-4 h-4 text-neon-purple" />
                       <span className="font-bold text-text-primary">像素图（{pixelSize}×{pixelSize}）</span>
                     </div>
                     {processedImage && (
                       <button
                         onClick={downloadImage}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/30 transition-colors text-sm font-medium"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neon-cyan/20 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/30 transition-colors text-sm font-medium"
                       >
-                        <Download className="w-4 h-4" />
+                        <Download className="w-3.5 h-3.5" />
                         下载
                       </button>
                     )}
                   </div>
-                  <div className="aspect-square bg-card/50 flex items-center justify-center p-4">
+                  <div className="aspect-square bg-card/50 flex items-center justify-center p-3">
                     {processedImage ? (
                       <img
                         src={processedImage}
@@ -240,9 +297,8 @@ export default function PixelArtPage() {
                       />
                     ) : (
                       <div className="text-center text-text-muted">
-                        <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                        <p className="text-lg">调节像素密度后点击生成</p>
-                        <p className="text-sm mt-2">生成 {pixelSize}×{pixelSize} 像素风效果</p>
+                        <Sparkles className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                        <p className="text-sm">生成中...</p>
                       </div>
                     )}
                   </div>
@@ -250,18 +306,18 @@ export default function PixelArtPage() {
               </div>
 
               {/* 控制区 */}
-              <div className="card glow-border rounded-2xl p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <Sliders className="w-6 h-6 text-neon-cyan" />
-                  <h3 className="text-xl font-bold text-text-primary">像素密度调节</h3>
+              <div className="card glow-border rounded-2xl p-5 mt-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sliders className="w-5 h-5 text-neon-cyan" />
+                  <h3 className="text-lg font-bold text-text-primary">像素密度调节</h3>
                 </div>
 
                 {/* 滑块 */}
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-text-muted text-sm">低密度（强像素感）</span>
-                    <span className="text-3xl font-bold gradient-text">{pixelSize}×{pixelSize}</span>
-                    <span className="text-text-muted text-sm">高密度（细节保留）</span>
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-text-muted text-xs">低密度</span>
+                    <span className="text-2xl font-bold gradient-text">{pixelSize}×{pixelSize}</span>
+                    <span className="text-text-muted text-xs">高密度</span>
                   </div>
                   <input
                     type="range"
@@ -269,34 +325,27 @@ export default function PixelArtPage() {
                     max="64"
                     value={pixelSize}
                     onChange={(e) => setPixelSize(Number(e.target.value))}
-                    className="w-full h-4 bg-card rounded-full appearance-none cursor-pointer accent-neon-cyan"
+                    className="w-full h-3 bg-card rounded-full appearance-none cursor-pointer accent-neon-cyan"
                     style={{
                       background: `linear-gradient(to right, #06b6d4 0%, #a855f7 ${(pixelSize - 4) / 60 * 100}%, #374151 ${(pixelSize - 4) / 60 * 100}%, #374151 100%)`
                     }}
                   />
-                  <div className="flex justify-between mt-3 text-text-muted text-xs">
-                    <span>4×4</span>
-                    <span>16×16</span>
-                    <span>32×32</span>
-                    <span>48×48</span>
-                    <span>64×64</span>
-                  </div>
                 </div>
 
                 {/* 按钮组 */}
-                <div className="flex gap-4 mb-8">
+                <div className="flex gap-3">
                   <button
                     onClick={processImage}
                     disabled={isProcessing || !uploadedImage}
-                    className="flex-1 bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-cyan/90 hover:to-neon-purple/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-5 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg shadow-neon-purple/25"
+                    className="flex-1 bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-cyan/90 hover:to-neon-purple/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-neon-purple/25"
                   >
                     {isProcessing ? '生成中...' : '生成像素图'}
                   </button>
                   <button
                     onClick={reset}
-                    className="flex items-center gap-2 px-8 py-5 rounded-xl border border-border text-text-primary font-semibold hover:bg-card transition-colors"
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-text-primary font-semibold hover:bg-card transition-colors"
                   >
-                    <RefreshCw className="w-5 h-5" />
+                    <RefreshCw className="w-4 h-4" />
                     重置
                   </button>
                 </div>
