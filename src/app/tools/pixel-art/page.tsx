@@ -134,84 +134,32 @@ export default function PixelArtPage() {
             </p>
           </div>
 
-          {/* 演示区域 - 三图并排 */}
+          {/* 演示区域 - 极简对比 */}
           {!uploadedImage && (
-            <div className="mb-12">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold gradient-text mb-2">
-                  🎨 效果演示
-                </h2>
-                <p className="text-text-secondary">
-                  以《戴珍珠耳环的少女》为例
-                </p>
-              </div>
-
-              <div className="card glow-border rounded-2xl p-8 max-w-5xl mx-auto">
-                {/* 三图并排 */}
-                <div className="grid grid-cols-3 gap-4 mb-8">
-                  {/* 原图 */}
-                  <div className="text-center">
-                    <div className="aspect-square bg-card/50 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-2">
-                      <img
-                        src={DEMO_IMAGE_URL}
-                        alt="原图"
-                        className="w-full h-full object-contain"
-                        crossOrigin="anonymous"
-                      />
-                    </div>
-                    <div className="font-bold text-text-primary">原图</div>
-                    <div className="text-text-muted text-xs mt-1">800×800</div>
-                  </div>
-
-                  {/* 箭头 */}
-                  <div className="flex items-center justify-center">
-                    <svg className="w-12 h-12 text-neon-cyan" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-                    </svg>
-                  </div>
-
-                  {/* 低像素 */}
-                  <div className="text-center">
-                    <div className="aspect-square bg-card/50 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-2">
-                      <DemoPixelCanvas imageUrl={DEMO_IMAGE_URL} pixelSize={8} />
-                    </div>
-                    <div className="font-bold text-text-primary">低像素</div>
-                    <div className="text-text-muted text-xs mt-1">8×8 网格</div>
-                  </div>
-
-                  {/* 箭头 */}
-                  <div className="flex items-center justify-center">
-                    <svg className="w-12 h-12 text-neon-purple" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-                    </svg>
-                  </div>
-
-                  {/* 高像素 */}
-                  <div className="text-center">
-                    <div className="aspect-square bg-card/50 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-2">
-                      <DemoPixelCanvas imageUrl={DEMO_IMAGE_URL} pixelSize={32} />
-                    </div>
-                    <div className="font-bold text-text-primary">高像素</div>
-                    <div className="text-text-muted text-xs mt-1">32×32 网格</div>
-                  </div>
+            <div className="mb-16">
+              <div className="flex items-center justify-center gap-8 max-w-4xl mx-auto">
+                {/* 原图 */}
+                <div className="text-center">
+                  <img
+                    src={DEMO_IMAGE_URL}
+                    alt="原图"
+                    className="w-64 h-64 object-cover rounded-lg shadow-2xl"
+                    crossOrigin="anonymous"
+                  />
+                  <div className="text-2xl font-bold text-text-primary mt-4">原图</div>
                 </div>
 
-                {/* 说明文字 */}
+                {/* 箭头 */}
+                <svg className="w-20 h-20 text-text-muted flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+
+                {/* 像素风 */}
                 <div className="text-center">
-                  <p className="text-text-secondary mb-4">
-                    上传图片，选择像素密度，一键生成像素风效果
-                  </p>
-                  <div className="flex justify-center gap-8 text-sm">
-                    <div className="text-text-muted">
-                      <span className="text-neon-cyan font-bold">4×4 - 8×8</span> 强像素感
-                    </div>
-                    <div className="text-text-muted">
-                      <span className="text-neon-purple font-bold">16×16 - 32×32</span> 平衡细节
-                    </div>
-                    <div className="text-text-muted">
-                      <span className="text-neon-pink font-bold">48×48 - 64×64</span> 细节丰富
-                    </div>
+                  <div className="w-64 h-64 rounded-lg shadow-2xl overflow-hidden">
+                    <DemoPixelCanvas imageUrl={DEMO_IMAGE_URL} pixelSize={16} />
                   </div>
+                  <div className="text-2xl font-bold text-text-primary mt-4">像素风</div>
                 </div>
               </div>
             </div>
