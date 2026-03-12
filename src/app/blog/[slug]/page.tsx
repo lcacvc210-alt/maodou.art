@@ -44,10 +44,11 @@ function getPostBySlug(slug: string) {
   };
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const posts = getAllPosts();
-  const post = getPostBySlug(params.slug);
-  const currentIndex = posts.findIndex(p => p.slug === params.slug);
+  const post = getPostBySlug(slug);
+  const currentIndex = posts.findIndex(p => p.slug === slug);
   
   const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
   const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
@@ -131,6 +132,23 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
               </Link>
             )}
             {nextPost && (
+              <Link href={`/blog/${nextPost.slug}`} className="card glow-border rounded-xl p-6 group hover:border-neon-cyan/50 transition-all md:text-right">
+                <div className="text-text-muted text-sm mb-2">下一篇 →</div>
+                <div className="text-text-primary font-medium group-hover:text-neon-cyan transition-colors line-clamp-1">
+                  {nextPost.title}
+                </div>
+              </Link>
+            )}
+          </div>
+
+          {/* 无文章导航时的提示 */}
+          {!prevPost && !nextPost && (
+            <div className="text-center py-8">
+              <Link href="/blog" className="text-neon-cyan hover:underline">
+                返回文章列表 →
+              </Link>
+            </div>
+          )}
               <Link href={`/blog/${nextPost.slug}`} className="card glow-border rounded-xl p-6 group hover:border-neon-cyan/50 transition-all md:text-right">
                 <div className="text-text-muted text-sm mb-2">下一篇 →</div>
                 <div className="text-text-primary font-medium group-hover:text-neon-cyan transition-colors line-clamp-1">
