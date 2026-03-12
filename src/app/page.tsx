@@ -132,7 +132,7 @@ export default function Home() {
                           {post.date}
                         </time>
                         <span>·</span>
-                        <span>{post.content?.length || 500} 字</span>
+                        <span>{post.summary?.length || 500} 字</span>
                       </div>
                       
                       <div className="flex gap-2">
