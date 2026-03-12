@@ -201,7 +201,7 @@ export default function Home() {
                 icon="🎨"
                 title="调色板生成器"
                 description="生成高级感配色方案，支持导出 CSS 变量、Tailwind 配置"
-                href="/tools/color-palette"
+                href="/tools"
                 features={["智能配色", "一键导出", "多格式支持"]}
                 isDark={isDark}
               />
