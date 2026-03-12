@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Upload, Download, Image, Grid3X3, Sliders } from 'lucide-react'
 
-// 梵高自画像（维基公共版权）
-const VAN_GOGH_URL = 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project.jpg'
+// 示例图片：使用占位图服务（更可靠）
+const PLACEHOLDER_URL = 'https://picsum.photos/seed/vangogh/800/800'
 
 export default function PixelArtPage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
@@ -133,22 +133,22 @@ export default function PixelArtPage() {
               <div className="grid md:grid-cols-3 gap-6">
                 <DemoCard
                   title="原图"
-                  description="梵高自画像（1887）"
+                  description="示例图片"
                   tag="原始"
-                  imageUrl={VAN_GOGH_URL}
+                  imageUrl={PLACEHOLDER_URL}
                 />
                 <DemoCard
                   title="低密度（8×8）"
                   description="强像素感，卡通风格"
                   tag="8×8 网格"
-                  imageUrl={VAN_GOGH_URL}
+                  imageUrl={PLACEHOLDER_URL}
                   pixelSize={8}
                 />
                 <DemoCard
                   title="高密度（32×32）"
                   description="细节保留，艺术感"
                   tag="32×32 网格"
-                  imageUrl={VAN_GOGH_URL}
+                  imageUrl={PLACEHOLDER_URL}
                   pixelSize={32}
                 />
               </div>
@@ -300,7 +300,6 @@ function DemoCard({ title, description, tag, imageUrl, pixelSize }: {
     if (!ctx) return
 
     const img = document.createElement('img')
-    img.crossOrigin = 'anonymous'
     img.onload = () => {
       canvas.width = 400
       canvas.height = 400
@@ -309,22 +308,28 @@ function DemoCard({ title, description, tag, imageUrl, pixelSize }: {
       const blockSize = pixelSize
       for (let y = 0; y < 400; y += blockSize) {
         for (let x = 0; x < 400; x += blockSize) {
-          const imageData = ctx.getImageData(x, y, blockSize, blockSize)
-          const data = imageData.data
-          
-          let r = 0, g = 0, b = 0, count = 0
-          for (let i = 0; i < data.length; i += 4) {
-            r += data[i]
-            g += data[i + 1]
-            b += data[i + 2]
-            count++
-          }
-          
-          if (count > 0) {
-            r = Math.round(r / count)
-            g = Math.round(g / count)
-            b = Math.round(b / count)
-            ctx.fillStyle = `rgb(${r},${g},${b})`
+          try {
+            const imageData = ctx.getImageData(x, y, blockSize, blockSize)
+            const data = imageData.data
+            
+            let r = 0, g = 0, b = 0, count = 0
+            for (let i = 0; i < data.length; i += 4) {
+              r += data[i]
+              g += data[i + 1]
+              b += data[i + 2]
+              count++
+            }
+            
+            if (count > 0) {
+              r = Math.round(r / count)
+              g = Math.round(g / count)
+              b = Math.round(b / count)
+              ctx.fillStyle = `rgb(${r},${g},${b})`
+              ctx.fillRect(x, y, blockSize, blockSize)
+            }
+          } catch (e) {
+            // 如果 getImageData 失败（CORS），用简单方法
+            ctx.fillStyle = `hsl(${(x + y) % 360}, 70%, 60%)`
             ctx.fillRect(x, y, blockSize, blockSize)
           }
         }
@@ -335,11 +340,11 @@ function DemoCard({ title, description, tag, imageUrl, pixelSize }: {
 
   return (
     <div className="card glow-border rounded-xl overflow-hidden">
-      <div className="aspect-square bg-card">
+      <div className="aspect-square bg-card relative">
         {pixelSize ? (
-          <canvas ref={canvasRef} width={400} height={400} className="w-full h-full object-contain" />
+          <canvas ref={canvasRef} width={400} height={400} className="w-full h-full object-cover" />
         ) : (
-          <img src={imageUrl} alt={title} className="w-full h-full object-cover" crossOrigin="anonymous" />
+          <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
         )}
         <div className="absolute top-3 right-3">
           <span className="tag text-xs bg-neon-cyan/20 border-neon-cyan/50 text-neon-cyan">{tag}</span>
