@@ -3,6 +3,8 @@ import path from "path";
 import matter from "gray-matter";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // 获取文章列表（用于上一篇下一篇）
 function getAllPosts() {
@@ -40,75 +42,6 @@ function getPostBySlug(slug: string) {
     frontmatter: data,
     content,
   };
-}
-
-// 简单的 Markdown 渲染（后续可以用 react-markdown）
-function renderMarkdown(content: string) {
-  // 这里先简单处理，后续可以接入完整的 Markdown 渲染器
-  const lines = content.split("\n");
-  
-  return lines.map((line, index) => {
-    // 标题
-    if (line.startsWith("## ")) {
-      return (
-        <h2 key={index} className="text-2xl font-bold text-text-primary mt-12 mb-6 gradient-text">
-          {line.replace("## ", "")}
-        </h2>
-      );
-    }
-    if (line.startsWith("### ")) {
-      return (
-        <h3 key={index} className="text-xl font-bold text-text-primary mt-8 mb-4">
-          {line.replace("### ", "")}
-        </h3>
-      );
-    }
-    
-    // 引用
-    if (line.startsWith("> ")) {
-      return (
-        <blockquote
-          key={index}
-          className="border-l-4 border-neon-cyan pl-6 py-2 my-6 bg-card/30 rounded-r-lg text-text-secondary italic"
-        >
-          {line.replace("> ", "")}
-        </blockquote>
-      );
-    }
-    
-    // 列表项
-    if (line.startsWith("- ")) {
-      return (
-        <li key={index} className="text-text-secondary ml-4 my-2">
-          {line.replace("- ", "")}
-        </li>
-      );
-    }
-    
-    // 分割线
-    if (line.startsWith("---")) {
-      return <hr key={index} className="divider-glow my-12" />;
-    }
-    
-    // 加粗
-    line = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-neon-cyan">$1</strong>');
-    
-    // 链接
-    line = line.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-neon-cyan hover:underline">$1</a>');
-    
-    // 普通段落
-    if (line.trim()) {
-      return (
-        <p
-          key={index}
-          className="text-text-secondary leading-relaxed my-4"
-          dangerouslySetInnerHTML={{ __html: line }}
-        />
-      );
-    }
-    
-    return null;
-  });
 }
 
 export default function BlogPost({ params }: { params: { slug: string } }) {
@@ -169,7 +102,19 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
 
           {/* 文章内容 */}
           <article className="prose prose-invert max-w-none">
-            {renderMarkdown(post.content)}
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+              h2: ({node, ...props}) => <h2 className="text-2xl font-bold text-text-primary mt-12 mb-6 gradient-text" {...props} />,
+              h3: ({node, ...props}) => <h3 className="text-xl font-bold text-text-primary mt-8 mb-4" {...props} />,
+              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-neon-cyan pl-6 py-2 my-6 bg-card/30 rounded-r-lg text-text-secondary italic" {...props} />,
+              ul: ({node, ...props}) => <ul className="list-disc list-inside my-4 space-y-2" {...props} />,
+              li: ({node, ...props}) => <li className="text-text-secondary ml-4" {...props} />,
+              p: ({node, ...props}) => <p className="text-text-secondary leading-relaxed my-4" {...props} />,
+              a: ({node, ...props}) => <a className="text-neon-cyan hover:underline" {...props} />,
+              strong: ({node, ...props}) => <strong className="text-neon-cyan" {...props} />,
+              hr: ({node, ...props}) => <hr className="divider-glow my-12" {...props} />,
+            }}>
+              {post.content}
+            </ReactMarkdown>
           </article>
 
           {/* 分割线 */}
