@@ -113,32 +113,43 @@ export default function PixelArtPage() {
     img.onload = () => {
       // 阶段 1：显示原图（2 秒）
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      const originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
       
       setTimeout(() => {
-        // 阶段 2：切割动画（1 秒）
+        // 阶段 2：切割动画（1 秒）- 叠加网格线
         animateCut(ctx, canvas.width, canvas.height, 8, () => {
-          // 阶段 3：组合成低密度像素图（1 秒）
+          // 恢复原图
+          ctx.putImageData(originalImageData, 0, 0)
+          // 阶段 3：像素化处理
           pixelate(ctx, img, canvas.width, canvas.height, 8, () => {
             setDemoStage(1)
+            const lowPixelData = ctx.getImageData(0, 0, canvas.width, canvas.height)
             
             setTimeout(() => {
-              // 阶段 4：再次切割（1 秒）
+              // 阶段 4：再次切割
               animateCut(ctx, canvas.width, canvas.height, 32, () => {
-                // 阶段 5：组合成高密度像素图（1 秒）
+                // 恢复低密度像素图
+                ctx.putImageData(lowPixelData, 0, 0)
+                // 阶段 5：高密度像素化
                 pixelate(ctx, img, canvas.width, canvas.height, 32, () => {
                   setDemoStage(2)
                   setIsAnimating(false)
                 })
               })
-            }, 1000)
+            }, 1500)
           })
         })
       }, 2000)
     }
+    img.onerror = () => {
+      console.error('图片加载失败')
+      setIsAnimating(false)
+      alert('演示图片加载失败，请上传自己的图片测试')
+    }
     img.src = VAN_GOGH_URL
   }
 
-  // 切割动画
+  // 切割动画（不清除画布，只叠加网格线）
   const animateCut = (ctx: CanvasRenderingContext2D, width: number, height: number, gridSize: number, callback: () => void) => {
     const blockSize = width / gridSize
     let progress = 0
@@ -149,24 +160,37 @@ export default function PixelArtPage() {
         return
       }
 
-      ctx.clearRect(0, 0, width, height)
-      
-      // 绘制网格切割效果
+      // 绘制网格切割效果（半透明叠加）
       for (let y = 0; y < height; y += blockSize) {
         for (let x = 0; x < width; x += blockSize) {
-          ctx.strokeStyle = `rgba(0, 240, 255, ${progress})`
+          ctx.strokeStyle = `rgba(0, 240, 255, ${progress * 0.5})`
           ctx.lineWidth = 2
           ctx.strokeRect(x, y, blockSize, blockSize)
         }
       }
       
-      requestAnimationFrame(animate)
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
     }
     animate()
   }
 
-  // 像素化处理
+  // 像素化处理 - 从 ImageData 计算
   const pixelate = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, width: number, height: number, gridSize: number, callback: () => void) => {
+    // 创建一个离屏 canvas 来获取图像数据
+    const offCanvas = document.createElement('canvas')
+    offCanvas.width = width
+    offCanvas.height = height
+    const offCtx = offCanvas.getContext('2d')
+    if (!offCtx) {
+      callback()
+      return
+    }
+
+    // 绘制图片到离屏 canvas
+    offCtx.drawImage(img, 0, 0, width, height)
+    
     const blockSize = width / gridSize
     let currentBlock = 0
     const totalBlocks = gridSize * gridSize
@@ -182,28 +206,37 @@ export default function PixelArtPage() {
       const x = col * blockSize
       const y = row * blockSize
 
-      // 获取像素块内的平均颜色
-      const imageData = ctx.getImageData(x, y, blockSize, blockSize)
-      const data = imageData.data
-      
-      let r = 0, g = 0, b = 0, count = 0
-      for (let i = 0; i < data.length; i += 4) {
-        r += data[i]
-        g += data[i + 1]
-        b += data[i + 2]
-        count++
+      try {
+        // 从离屏 canvas 获取像素数据（避免 CORS 问题）
+        const imageData = offCtx.getImageData(x, y, blockSize, blockSize)
+        const data = imageData.data
+        
+        let r = 0, g = 0, b = 0, count = 0
+        for (let i = 0; i < data.length; i += 4) {
+          r += data[i]
+          g += data[i + 1]
+          b += data[i + 2]
+          count++
+        }
+        
+        if (count > 0) {
+          r = Math.round(r / count)
+          g = Math.round(g / count)
+          b = Math.round(b / count)
+          
+          // 填充整个像素块为平均色
+          ctx.fillStyle = `rgb(${r},${g},${b})`
+          ctx.fillRect(x, y, blockSize, blockSize)
+        }
+      } catch (e) {
+        console.error('像素化失败:', e)
+        // 失败时使用随机色块作为备选
+        ctx.fillStyle = `hsl(${Math.random() * 360}, 70%, 60%)`
+        ctx.fillRect(x, y, blockSize, blockSize)
       }
-      
-      r = Math.round(r / count)
-      g = Math.round(g / count)
-      b = Math.round(b / count)
-      
-      // 填充整个像素块为平均色
-      ctx.fillStyle = `rgb(${r},${g},${b})`
-      ctx.fillRect(x, y, blockSize, blockSize)
 
       currentBlock++
-      setTimeout(processNextBlock, 10) // 每块间隔 10ms
+      setTimeout(processNextBlock, 20) // 每块间隔 20ms
     }
 
     processNextBlock()
