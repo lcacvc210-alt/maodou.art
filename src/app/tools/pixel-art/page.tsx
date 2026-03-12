@@ -4,13 +4,19 @@ import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Upload, Download, Image, Grid3X3, Sliders, Sparkles, RefreshCw } from 'lucide-react'
 
+// 示例图片：戴珍珠耳环的少女（维基公共版权）
+const DEMO_IMAGE_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/800px-1665_Girl_with_a_Pearl_Earring.jpg'
+
 export default function PixelArtPage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [pixelSize, setPixelSize] = useState(35)
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showGrid, setShowGrid] = useState(false)
+  const [isDemoAnimating, setIsDemoAnimating] = useState(false)
+  const [demoStage, setDemoStage] = useState(0)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const demoCanvasRef = useRef<HTMLCanvasElement>(null)
 
   // 处理图片上传
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +107,127 @@ export default function PixelArtPage() {
     setShowGrid(!showGrid)
   }
 
+  // 演示动画
+  const playDemoAnimation = () => {
+    if (!demoCanvasRef.current || isDemoAnimating) return
+    setIsDemoAnimating(true)
+    setDemoStage(0)
+
+    const canvas = demoCanvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const img = document.createElement('img')
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      // 阶段 1：显示原图（2 秒）
+      canvas.width = 400
+      canvas.height = 400
+      ctx.drawImage(img, 0, 0, 400, 400)
+      
+      setTimeout(() => {
+        // 阶段 2：网格分割动画（1.5 秒）
+        setDemoStage(1)
+        animateGrid(ctx, 400, 400, 35, () => {
+          // 阶段 3：像素化处理（2 秒）
+          setDemoStage(2)
+          pixelateDemo(ctx, img, 400, 400, 35, () => {
+            // 阶段 4：完成（1 秒）
+            setDemoStage(3)
+            setTimeout(() => {
+              setIsDemoAnimating(false)
+            }, 1000)
+          })
+        })
+      }, 2000)
+    }
+    img.src = DEMO_IMAGE_URL
+  }
+
+  // 网格分割动画
+  const animateGrid = (ctx: CanvasRenderingContext2D, width: number, height: number, gridSize: number, callback: () => void) => {
+    const blockSize = width / gridSize
+    let progress = 0
+    const animate = () => {
+      progress += 0.03
+      if (progress >= 1) {
+        callback()
+        return
+      }
+
+      // 绘制网格线
+      ctx.strokeStyle = `rgba(6, 182, 212, ${progress})`
+      ctx.lineWidth = 1
+      for (let y = 0; y <= height; y += blockSize) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(width, y)
+        ctx.stroke()
+      }
+      for (let x = 0; x <= width; x += blockSize) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, height)
+        ctx.stroke()
+      }
+
+      requestAnimationFrame(animate)
+    }
+    animate()
+  }
+
+  // 演示像素化
+  const pixelateDemo = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, width: number, height: number, gridSize: number, callback: () => void) => {
+    const blockSize = Math.floor(width / gridSize)
+    let currentBlock = 0
+    const totalBlocks = gridSize * gridSize
+
+    const processNextBlock = () => {
+      if (currentBlock >= totalBlocks) {
+        callback()
+        return
+      }
+
+      const row = Math.floor(currentBlock / gridSize)
+      const col = currentBlock % gridSize
+      const x = col * blockSize
+      const y = row * blockSize
+
+      const tempCanvas = document.createElement('canvas')
+      const tempCtx = tempCanvas.getContext('2d')
+      if (tempCtx) {
+        tempCanvas.width = blockSize
+        tempCanvas.height = blockSize
+        tempCtx.drawImage(img, x, y, blockSize, blockSize, 0, 0, blockSize, blockSize)
+        
+        const imageData = tempCtx.getImageData(0, 0, blockSize, blockSize)
+        const data = imageData.data
+        
+        let r = 0, g = 0, b = 0, count = 0
+        for (let i = 0; i < data.length; i += 4) {
+          r += data[i]
+          g += data[i + 1]
+          b += data[i + 2]
+          count++
+        }
+        
+        if (count > 0) {
+          r = Math.round(r / count)
+          g = Math.round(g / count)
+          b = Math.round(b / count)
+          
+          ctx.fillStyle = `rgb(${r},${g},${b})`
+          ctx.fillRect(x, y, blockSize, blockSize)
+        }
+      }
+
+      currentBlock++
+      setTimeout(processNextBlock, 15)
+    }
+
+    processNextBlock()
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* 背景效果 */}
@@ -130,6 +257,57 @@ export default function PixelArtPage() {
               将图片分割成像素色块，生成复古像素风效果
             </p>
           </div>
+
+          {/* 演示区域 */}
+          {!uploadedImage && (
+            <div className="mb-12">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold gradient-text mb-2">
+                  🎨 效果演示
+                </h2>
+                <p className="text-text-secondary">
+                  以《戴珍珠耳环的少女》为例，看看像素化过程
+                </p>
+              </div>
+
+              <div className="card glow-border rounded-2xl p-8 max-w-4xl mx-auto">
+                {/* 演示画布 */}
+                <div className="aspect-video bg-card/50 rounded-xl overflow-hidden mb-6 flex items-center justify-center">
+                  <canvas
+                    ref={demoCanvasRef}
+                    width={400}
+                    height={400}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+
+                {/* 阶段指示器 */}
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <StageIndicator stage={0} current={demoStage} label="原图" icon="🖼️" />
+                  <div className={`w-12 h-1 bg-card rounded-full transition-all ${demoStage >= 1 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
+                  <StageIndicator stage={1} current={demoStage} label="网格分割" icon="⊞" />
+                  <div className={`w-12 h-1 bg-card rounded-full transition-all ${demoStage >= 2 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
+                  <StageIndicator stage={2} current={demoStage} label="像素化" icon="🎨" />
+                  <div className={`w-12 h-1 bg-card rounded-full transition-all ${demoStage >= 3 ? 'bg-gradient-to-r from-neon-cyan to-neon-purple' : ''}`} />
+                  <StageIndicator stage={3} current={demoStage} label="完成" icon="✨" />
+                </div>
+
+                {/* 控制按钮 */}
+                <div className="text-center">
+                  <button
+                    onClick={playDemoAnimation}
+                    disabled={isDemoAnimating}
+                    className="btn-gradient px-8 py-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isDemoAnimating ? '🎬 演示中...' : '▶️ 播放演示动画'}
+                  </button>
+                  <p className="text-text-muted text-sm mt-4">
+                    点击播放，观看从原图到像素艺术的变换过程
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 上传区域 */}
           {!uploadedImage ? (
@@ -300,6 +478,38 @@ export default function PixelArtPage() {
             <p className="mt-2">Built with 💜 for creators</p>
           </div>
         </footer>
+      </div>
+    </div>
+  )
+}
+
+// 阶段指示器组件
+function StageIndicator({ stage, current, label, icon }: {
+  stage: number
+  current: number
+  label: string
+  icon: string
+}) {
+  const isActive = current === stage
+  const isCompleted = current > stage
+
+  return (
+    <div className={`flex flex-col items-center gap-2 transition-all duration-500 ${
+      isActive ? 'scale-110' : isCompleted ? 'opacity-70' : 'opacity-40'
+    }`}>
+      <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-all duration-500 ${
+        isActive 
+          ? 'bg-gradient-to-r from-neon-cyan to-neon-purple shadow-lg shadow-neon-cyan/50' 
+          : isCompleted
+          ? 'bg-neon-cyan/20 border-2 border-neon-cyan/50'
+          : 'bg-card border-2 border-border'
+      }`}>
+        {icon}
+      </div>
+      <div className={`text-xs font-medium transition-colors ${
+        isActive ? 'text-neon-cyan' : 'text-text-muted'
+      }`}>
+        {label}
       </div>
     </div>
   )
