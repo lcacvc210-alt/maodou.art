@@ -21,7 +21,7 @@ const tools = [
     href: '/tools/pixel-art',
     features: ['8bit 风格', '自定义像素', '批量处理', '透明背景'],
     gradient: 'from-green-400 via-blue-500 to-purple-600',
-    status: 'coming-soon',
+    status: 'online',
   },
   {
     icon: '📐',
