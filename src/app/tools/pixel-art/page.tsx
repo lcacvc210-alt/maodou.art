@@ -28,7 +28,7 @@ export default function PixelArtPage() {
     }
   }
 
-  // 像素化处理
+  // 像素化处理（方案 A：颜色量化 + 色彩分层）
   const processImage = () => {
     if (!uploadedImage || !canvasRef.current) return
     setIsProcessing(true)
@@ -38,35 +38,39 @@ export default function PixelArtPage() {
 
     const img = document.createElement('img')
     img.onload = () => {
+      // 步骤 1：缩小画布（像素化）
+      const smallSize = pixelSize
+      const smallCanvas = document.createElement('canvas')
+      const smallCtx = smallCanvas.getContext('2d')
+      if (!smallCtx) return
+      
+      smallCanvas.width = smallSize
+      smallCanvas.height = smallSize
+      smallCtx.drawImage(img, 0, 0, smallSize, smallSize)
+      
+      // 步骤 2：获取像素数据并处理
+      const imageData = smallCtx.getImageData(0, 0, smallSize, smallSize)
+      const data = imageData.data
+      
+      // 步骤 3：颜色量化 + 色彩分层
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+        
+        // 颜色量化：将 RGB 各通道压缩到 4 个层级 (0-63, 64-127, 128-191, 192-255)
+        data[i] = Math.floor(r / 64) * 64 + 32
+        data[i + 1] = Math.floor(g / 64) * 64 + 32
+        data[i + 2] = Math.floor(b / 64) * 64 + 32
+      }
+      
+      smallCtx.putImageData(imageData, 0, 0)
+      
+      // 步骤 4：放大回原尺寸（使用最近邻插值保持硬边缘）
       canvas.width = img.width
       canvas.height = img.height
-      ctx.drawImage(img, 0, 0)
-
-      const blockSize = Math.floor(Math.min(img.width, img.height) / pixelSize)
-      
-      for (let y = 0; y < img.height; y += blockSize) {
-        for (let x = 0; x < img.width; x += blockSize) {
-          const imageData = ctx.getImageData(x, y, blockSize, blockSize)
-          const data = imageData.data
-          
-          let r = 0, g = 0, b = 0, count = 0
-          for (let i = 0; i < data.length; i += 4) {
-            r += data[i]
-            g += data[i + 1]
-            b += data[i + 2]
-            count++
-          }
-          
-          if (count > 0) {
-            r = Math.round(r / count)
-            g = Math.round(g / count)
-            b = Math.round(b / count)
-            
-            ctx.fillStyle = `rgb(${r},${g},${b})`
-            ctx.fillRect(x, y, blockSize, blockSize)
-          }
-        }
-      }
+      ctx.imageSmoothingEnabled = false // 关键：关闭平滑，保持像素硬边缘
+      ctx.drawImage(smallCanvas, 0, 0, img.width, img.height)
 
       setProcessedImage(canvas.toDataURL('image/png'))
       setIsProcessing(false)
