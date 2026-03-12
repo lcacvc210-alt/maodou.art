@@ -28,7 +28,7 @@ export default function PixelArtPage() {
     }
   }
 
-  // 像素化处理：网格切分 + 抽帧重组
+  // 像素化处理：网格切分 + 放大显示
   const processImage = () => {
     if (!uploadedImage || !canvasRef.current) return
     setIsProcessing(true)
@@ -38,14 +38,49 @@ export default function PixelArtPage() {
 
     const img = document.createElement('img')
     img.onload = () => {
-      // 设置输出画布为像素网格大小（如 8×8）
-      const gridSize = pixelSize
-      canvas.width = gridSize
-      canvas.height = gridSize
+      // 保持原图尺寸输出
+      canvas.width = img.width
+      canvas.height = img.height
       
-      // 绘制缩小图（自动完成像素块抽帧）
-      ctx.imageSmoothingEnabled = false
-      ctx.drawImage(img, 0, 0, gridSize, gridSize)
+      // 计算每个像素块的大小
+      const blockSize = Math.floor(Math.min(img.width, img.height) / pixelSize)
+      
+      // 遍历每个像素块，取平均色填充
+      for (let y = 0; y < img.height; y += blockSize) {
+        for (let x = 0; x < img.width; x += blockSize) {
+          // 创建临时小画布获取这个块的平均色
+          const tempCanvas = document.createElement('canvas')
+          const tempCtx = tempCanvas.getContext('2d')
+          if (!tempCtx) continue
+          
+          tempCanvas.width = blockSize
+          tempCanvas.height = blockSize
+          tempCtx.drawImage(img, x, y, blockSize, blockSize, 0, 0, blockSize, blockSize)
+          
+          // 获取像素数据
+          const imageData = tempCtx.getImageData(0, 0, blockSize, blockSize)
+          const data = imageData.data
+          
+          // 计算平均色
+          let r = 0, g = 0, b = 0, count = 0
+          for (let i = 0; i < data.length; i += 4) {
+            r += data[i]
+            g += data[i + 1]
+            b += data[i + 2]
+            count++
+          }
+          
+          if (count > 0) {
+            r = Math.round(r / count)
+            g = Math.round(g / count)
+            b = Math.round(b / count)
+            
+            // 填充整个块为平均色
+            ctx.fillStyle = `rgb(${r},${g},${b})`
+            ctx.fillRect(x, y, blockSize, blockSize)
+          }
+        }
+      }
 
       setProcessedImage(canvas.toDataURL('image/png'))
       setIsProcessing(false)
