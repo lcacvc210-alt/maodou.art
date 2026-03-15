@@ -125,7 +125,7 @@ export default function HomePageContent({ featuredPosts }: HomePageContentProps)
                           {post.date}
                         </time>
                         <span className="text-text-muted/50">·</span>
-                        <span>{Math.ceil((post.summary?.length || 500) / 2)} 字</span>
+                        <span>{post.wordCount || 0} 字</span>
                       </div>
                       
                       {/* 第二行：标签 */}

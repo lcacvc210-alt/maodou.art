@@ -10,6 +10,7 @@ export interface Post {
   summary: string
   draft: boolean
   content: string
+  wordCount: number
 }
 
 // 获取所有文章
@@ -25,6 +26,9 @@ export function getPosts(): Post[] {
       const fileContents = fs.readFileSync(fullPath, 'utf8')
       const { data, content } = matter(fileContents)
       
+      // 计算字数（中文字符）
+      const wordCount = content.replace(/```[\s\S]*?```/g, '').replace(/[#*`\n]/g, '').length
+      
       return {
         slug,
         title: data.title,
@@ -33,6 +37,7 @@ export function getPosts(): Post[] {
         summary: data.summary || '',
         draft: data.draft || false,
         content,
+        wordCount,
       }
     })
     .filter(post => !post.draft)
