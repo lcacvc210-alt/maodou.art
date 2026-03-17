@@ -73,12 +73,24 @@ export default function BlogPost() {
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault()
     if (post && password === post.password) {
-      setIsUnlocked(true)
-      setError('')
       // 保存解锁状态到 localStorage
       const unlockedPosts = JSON.parse(localStorage.getItem('unlockedPosts') || '{}')
       unlockedPosts[slug] = true
       localStorage.setItem('unlockedPosts', JSON.stringify(unlockedPosts))
+      
+      // 重新获取文章内容（API 会返回完整内容）
+      fetch(`/api/posts/${slug}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data) {
+            setPost(data)
+            setIsUnlocked(true)
+            setError('')
+          }
+        })
+        .catch(() => {
+          setError('获取文章内容失败，请重试')
+        })
     } else {
       setError('密码错误，请重试')
     }
