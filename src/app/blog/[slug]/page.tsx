@@ -18,6 +18,11 @@ interface Post {
   password?: string
 }
 
+interface UnlockedPost {
+  unlockedAt: number
+  expiresAt: number
+}
+
 // 获取所有文章
 function getAllPosts(): Post[] {
   return []
@@ -40,10 +45,20 @@ export default function BlogPost() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // 检查 localStorage 中是否有已解锁的文章
+    // 检查 localStorage 中是否有已解锁的文章（带过期时间检查）
     const unlockedPosts = JSON.parse(localStorage.getItem('unlockedPosts') || '{}')
+    const now = Date.now()
+    
     if (unlockedPosts[slug]) {
-      setIsUnlocked(true)
+      const unlockInfo: UnlockedPost = unlockedPosts[slug]
+      // 检查是否过期（30 分钟 = 30 * 60 * 1000 毫秒）
+      if (now < unlockInfo.expiresAt) {
+        setIsUnlocked(true)
+      } else {
+        // 已过期，清除解锁状态
+        delete unlockedPosts[slug]
+        localStorage.setItem('unlockedPosts', JSON.stringify(unlockedPosts))
+      }
     }
 
     // 获取文章内容
@@ -73,24 +88,19 @@ export default function BlogPost() {
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault()
     if (post && password === post.password) {
-      // 保存解锁状态到 localStorage
+      const now = Date.now()
+      const unlockInfo: UnlockedPost = {
+        unlockedAt: now,
+        expiresAt: now + 30 * 60 * 1000, // 30 分钟后过期
+      }
+      
+      // 保存解锁状态到 localStorage（带时间戳）
       const unlockedPosts = JSON.parse(localStorage.getItem('unlockedPosts') || '{}')
-      unlockedPosts[slug] = true
+      unlockedPosts[slug] = unlockInfo
       localStorage.setItem('unlockedPosts', JSON.stringify(unlockedPosts))
       
-      // 重新获取文章内容（API 会返回完整内容）
-      fetch(`/api/posts/${slug}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data) {
-            setPost(data)
-            setIsUnlocked(true)
-            setError('')
-          }
-        })
-        .catch(() => {
-          setError('获取文章内容失败，请重试')
-        })
+      setIsUnlocked(true)
+      setError('')
     } else {
       setError('密码错误，请重试')
     }
@@ -253,6 +263,14 @@ export default function BlogPost() {
                   <Lock className="w-4 h-4" />
                   重新锁定
                 </button>
+              )}
+              
+              {/* 解锁状态提示 */}
+              {post.password && isUnlocked && (
+                <div className="mt-4 text-center text-sm text-text-muted">
+                  <Unlock className="w-4 h-4 inline mr-2" />
+                  已解锁 · 30 分钟后自动锁定
+                </div>
               )}
             </div>
           </div>

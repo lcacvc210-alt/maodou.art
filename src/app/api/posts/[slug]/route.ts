@@ -27,7 +27,7 @@ export async function GET(
       date: data.date,
       tags: data.tags || [],
       summary: data.summary || '',
-      content: data.password ? '' : content, // 有密码时不返回内容
+      content: content, // 始终返回完整内容
       wordCount,
       password: data.password || undefined,
     }
