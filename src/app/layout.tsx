@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,9 +37,7 @@ export default function RootLayout({
           <main className="min-h-screen pt-16">
             {children}
           </main>
-          <footer className="py-8 text-center text-sm text-text-secondary border-t border-border">
-            <p>© 2026 毛豆的思考空间 | maodou.art</p>
-          </footer>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
