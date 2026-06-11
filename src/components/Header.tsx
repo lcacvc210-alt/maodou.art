@@ -1,174 +1,64 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { Moon, Sun, Menu, X } from 'lucide-react'
+import { Menu, Moon, Sun, X } from 'lucide-react'
+
+const links = [
+  { href: '/', label: '首页', index: '01' },
+  { href: '/blog', label: '文章', index: '02' },
+  { href: '/tools', label: '工具', index: '03' },
+  { href: '/about', label: '关于', index: '04' },
+]
 
 export default function Header() {
-  const [isDark, setIsDark] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  useEffect(() => {
-    // 从 localStorage 读取主题
-    const saved = localStorage.getItem('theme')
-    if (saved) {
-      setIsDark(saved === 'dark')
-    }
-  }, [])
 
   const toggleTheme = () => {
-    const newIsDark = !isDark
-    setIsDark(newIsDark)
-    if (newIsDark) {
-      document.documentElement.classList.add('dark')
-      document.documentElement.classList.remove('light')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      document.documentElement.classList.add('light')
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
+    const next = !document.documentElement.classList.contains('dark')
+    document.documentElement.classList.toggle('dark', next)
+    document.documentElement.classList.toggle('light', !next)
+    localStorage.setItem('theme', next ? 'dark' : 'light')
   }
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'border-b border-border/50' 
-          : ''
-      }`}
-    >
-      {/* 顶部发光条（仅深色模式） */}
-      <div className="hidden dark:block h-[1px] w-full bg-gradient-to-r from-transparent via-neon-cyan/50 to-transparent" />
-      
-      <nav className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo - MAODOU.art */}
-          <Link href="/" className="logo text-2xl">
-            {isDark ? (
-              <span className="logo-dark">
-                MAODOU<span className="art">.art</span>
-              </span>
-            ) : (
-              <span className="logo-light">
-                MAODOU<span className="art">.art</span>
-              </span>
-            )}
-          </Link>
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+        <Link href="/" className="logo text-2xl">
+          maodou<span className="art">.art</span>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2">
-            <NavLink href="/" isDark={isDark}>首页</NavLink>
-            <NavLink href="/blog" isDark={isDark}>文章</NavLink>
-            <NavLink href="/tools" isDark={isDark}>工具</NavLink>
-            <NavLink href="/about" isDark={isDark}>关于</NavLink>
-            
-            <div className="w-px h-6 bg-border mx-2" />
-            
-            {/* 日夜切换按钮 */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2.5 rounded-xl border transition-all duration-300 group ${
-                isDark 
-                  ? 'bg-card/50 border-border/50 hover:border-neon-cyan/50' 
-                  : 'bg-white border-gray-200 hover:border-blue-400 shadow-sm'
-              }`}
-              aria-label="切换主题"
-            >
-              {isDark ? (
-                <Sun className="w-5 h-5 text-yellow-400 group-hover:rotate-90 transition-transform" />
-              ) : (
-                <Moon className="w-5 h-5 text-slate-600 group-hover:-rotate-12 transition-transform" />
-              )}
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className={`p-2.5 rounded-xl border ${
-                isDark 
-                  ? 'bg-card/50 border-border/50' 
-                  : 'bg-white border-gray-200 shadow-sm'
-              }`}
-              aria-label="切换主题"
-            >
-              {isDark ? (
-                <Sun className="w-5 h-5 text-yellow-400" />
-              ) : (
-                <Moon className="w-5 h-5 text-slate-600" />
-              )}
-            </button>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`p-2 transition-colors ${
-                isDark 
-                  ? 'text-text-secondary hover:text-neon-cyan' 
-                  : 'text-gray-600 hover:text-blue-600'
-              }`}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+        <div className="hidden items-center gap-7 md:flex">
+          {links.map(link => (
+            <Link key={link.href} href={link.href} className="group flex items-baseline gap-1.5 text-sm text-text-secondary">
+              <span className="font-mono text-[9px] text-text-muted group-hover:text-neon-cyan">{link.index}</span>
+              {link.label}
+            </Link>
+          ))}
+          <button onClick={toggleTheme} className="border-l border-border pl-6 text-text-secondary hover:text-neon-cyan" aria-label="切换主题">
+            <Moon className="h-4 w-4 dark:hidden" /><Sun className="hidden h-4 w-4 dark:block" />
+          </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className={`md:hidden mt-4 pb-4 space-y-2 backdrop-blur-xl rounded-2xl border p-4 ${
-            isDark 
-              ? 'bg-card/30 border-border/50' 
-              : 'bg-white/80 border-gray-200'
-          }`}>
-            <MobileNavLink href="/" onClick={() => setIsMenuOpen(false)} isDark={isDark}>首页</MobileNavLink>
-            <MobileNavLink href="/blog" onClick={() => setIsMenuOpen(false)} isDark={isDark}>文章</MobileNavLink>
-            <MobileNavLink href="/tools" onClick={() => setIsMenuOpen(false)} isDark={isDark}>工具</MobileNavLink>
-            <MobileNavLink href="/about" onClick={() => setIsMenuOpen(false)} isDark={isDark}>关于</MobileNavLink>
-          </div>
-        )}
+        <div className="flex items-center gap-4 md:hidden">
+          <button onClick={toggleTheme} className="text-text-secondary" aria-label="切换主题">
+            <Moon className="h-5 w-5 dark:hidden" /><Sun className="hidden h-5 w-5 dark:block" />
+          </button>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-text-primary" aria-label="打开菜单">
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </nav>
+
+      {isMenuOpen && (
+        <div className="border-t border-border bg-background px-5 py-4 md:hidden">
+          {links.map(link => (
+            <Link key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)} className="flex justify-between border-b border-border py-3 text-text-secondary last:border-0">
+              {link.label}<span className="font-mono text-xs text-text-muted">{link.index}</span>
+            </Link>
+          ))}
+        </div>
+      )}
     </header>
-  )
-}
-
-// Desktop Nav Link
-function NavLink({ href, children, isDark }: { href: string; children: React.ReactNode; isDark: boolean }) {
-  return (
-    <Link 
-      href={href}
-      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
-        isDark
-          ? 'text-text-secondary hover:text-neon-cyan hover:bg-neon-cyan/5'
-          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-      }`}
-    >
-      {children}
-    </Link>
-  )
-}
-
-// Mobile Nav Link
-function MobileNavLink({ href, children, onClick, isDark }: { href: string; children: React.ReactNode; onClick: () => void; isDark: boolean }) {
-  return (
-    <Link 
-      href={href}
-      onClick={onClick}
-      className={`block px-4 py-3 rounded-xl transition-all duration-300 ${
-        isDark
-          ? 'text-text-secondary hover:text-neon-cyan hover:bg-neon-cyan/5'
-          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-      }`}
-    >
-      {children}
-    </Link>
   )
 }

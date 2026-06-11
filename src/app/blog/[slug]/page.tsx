@@ -122,15 +122,9 @@ export default function BlogPost() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* 背景效果 */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="cyber-grid" />
-        <div className="glow-orb glow-orb-1" />
-      </div>
-
-      <div className="relative z-10 py-12 px-6">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <div className="py-12 px-5 sm:px-8 sm:py-20">
+        <div className="max-w-5xl mx-auto">
           {/* 返回按钮 */}
           <Link
             href="/blog"
@@ -141,8 +135,9 @@ export default function BlogPost() {
           </Link>
 
           {/* 文章头部 */}
-          <div className="mb-12">
-            <div className="flex items-center gap-4 text-text-muted text-sm mb-6">
+          <div className="mb-14 border-b border-border pb-12">
+            <p className="editorial-kicker mb-6">Personal dispatch</p>
+            <div className="flex items-center gap-4 text-text-muted text-xs font-mono mb-7">
               <time className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 {post.date}
@@ -154,7 +149,7 @@ export default function BlogPost() {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-8 leading-tight">
+            <h1 className="max-w-4xl text-4xl md:text-6xl font-bold mb-9 leading-[1.08]">
               {post.title}
             </h1>
 
@@ -205,16 +200,16 @@ export default function BlogPost() {
             </div>
           ) : (
             /* 文章内容 */
-            <article className="prose prose-invert max-w-none">
+            <article className="article-copy max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
                 h2: ({node, ...props}) => (
-                  <h2 className="text-2xl font-bold text-text-primary mt-12 mb-6 gradient-text" {...props} />
+                  <h2 className="text-2xl font-bold text-text-primary mt-14 mb-6" {...props} />
                 ),
                 h3: ({node, ...props}) => (
                   <h3 className="text-xl font-bold text-text-primary mt-8 mb-4" {...props} />
                 ),
                 blockquote: ({node, ...props}) => (
-                  <blockquote className="border-l-4 border-neon-cyan pl-6 py-2 my-6 bg-card/30 rounded-r-lg text-text-secondary italic" {...props} />
+                  <blockquote className="border-l-2 border-neon-cyan pl-6 py-4 my-8 text-text-secondary italic" {...props} />
                 ),
                 ul: ({node, ...props}) => (
                   <ul className="list-disc list-inside my-4 space-y-2" {...props} />
@@ -276,12 +271,6 @@ export default function BlogPost() {
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className="py-12 px-6 border-t border-border/50 mt-20">
-          <div className="max-w-4xl mx-auto text-center text-text-muted text-sm">
-            <p>© 2026 毛豆的思考空间 | maodou.art</p>
-          </div>
-        </footer>
       </div>
     </div>
   )

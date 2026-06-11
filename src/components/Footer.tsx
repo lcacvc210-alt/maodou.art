@@ -1,76 +1,36 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 export default function Footer() {
-  const [visits, setVisits] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [visits, setVisits] = useState<number | null>(null)
 
   useEffect(() => {
-    // 记录访问并获取最新计数
-    const trackVisit = async () => {
-      try {
-        const response = await fetch('/api/visit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            path: window.location.pathname,
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setVisits(data.totalVisits);
-        }
-      } catch (error) {
-        console.error('Failed to track visit:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    trackVisit();
-  }, []);
+    fetch('/api/visit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: window.location.pathname }),
+    })
+      .then(response => response.ok ? response.json() : null)
+      .then(data => data && setVisits(data.totalVisits))
+      .catch(() => undefined)
+  }, [])
 
   return (
-    <footer className="w-full py-6 mt-auto border-t border-gray-200 dark:border-gray-800">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          {/* 版权信息 */}
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            © {new Date().getFullYear()} MAODOU.art. All rights reserved.
+    <footer className="mt-auto border-t border-border px-5 py-10 sm:px-8">
+      <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <Link href="/" className="logo text-2xl">maodou<span className="art">.art</span></Link>
+          <p className="mt-3 max-w-md text-sm text-text-muted">记录财经、科技与创作中的真实判断。观点会变化，思考持续发生。</p>
+        </div>
+        <div className="text-left text-xs text-text-muted md:text-right">
+          <div className="mb-2 flex gap-5 md:justify-end">
+            <Link href="/blog">文章</Link><Link href="/tools">工具</Link><Link href="/admin/stats">统计</Link>
           </div>
-
-          {/* 访问统计 */}
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              <span>
-                {loading ? (
-                  <span className="animate-pulse">加载中...</span>
-                ) : (
-                  <>总访问量：<span className="font-semibold text-gray-900 dark:text-white">{visits || 0}</span></>
-                )}
-              </span>
-            </div>
-          </div>
-
-          {/* 链接 */}
-          <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
-            <a href="/blog" className="hover:text-gray-900 dark:hover:text-white transition-colors">
-              博客
-            </a>
-            <a href="/tools" className="hover:text-gray-900 dark:hover:text-white transition-colors">
-              工具
-            </a>
-            <a href="/admin/stats" className="hover:text-gray-900 dark:hover:text-white transition-colors">
-              统计
-            </a>
-          </div>
+          <p>© {new Date().getFullYear()} MAODOU.ART · {visits === null ? '—' : `${visits} 次访问`}</p>
         </div>
       </div>
     </footer>
-  );
+  )
 }

@@ -1,48 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [isDark, setIsDark] = useState(true)
-  const [mounted, setMounted] = useState(false)
-
   useEffect(() => {
-    setMounted(true)
-    // 检查 localStorage 或系统偏好
-    const saved = localStorage.getItem('theme')
-    if (saved) {
-      setIsDark(saved === 'dark')
-    } else {
-      // 默认深色模式
-      setIsDark(true)
-    }
+    const isDark = localStorage.getItem('theme') === 'dark'
+    document.documentElement.classList.toggle('dark', isDark)
+    document.documentElement.classList.toggle('light', !isDark)
   }, [])
 
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark')
-      document.documentElement.classList.remove('light')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      document.documentElement.classList.add('light')
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-  }, [isDark])
-
-  // 避免服务端渲染不匹配
-  if (!mounted) {
-    return <>{children}</>
-  }
-
-  return (
-    <>
-      {children}
-      <style jsx global>{`
-        html {
-          color-scheme: ${isDark ? 'dark' : 'light'};
-        }
-      `}</style>
-    </>
-  )
+  return children
 }
