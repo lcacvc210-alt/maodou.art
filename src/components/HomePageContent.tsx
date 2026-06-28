@@ -1,64 +1,54 @@
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, BarChart3, BookOpen, Wrench } from 'lucide-react'
 import { Post } from '@/lib/posts'
 
 export default function HomePageContent({ featuredPosts }: { featuredPosts: Post[] }) {
+  const [lead, ...latest] = featuredPosts
   return (
-    <div className="px-5 pb-20 pt-12 sm:px-8 sm:pt-20">
+    <div className="px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
       <div className="mx-auto max-w-7xl">
-        <section className="border-b border-border pb-14 sm:pb-20">
-          <div className="grid gap-10 lg:grid-cols-[1.45fr_.55fr] lg:items-end">
-            <div>
-              <p className="editorial-kicker mb-6">Independent notes · Xinjiang · 2026</p>
-              <h1 className="max-w-5xl text-[clamp(3.2rem,10vw,8.8rem)] font-semibold leading-[0.86] tracking-[-0.085em]">
-                不追逐噪音，<br /><span className="text-neon-cyan">记录真实判断。</span>
-              </h1>
-            </div>
-            <div className="border-l border-border pl-6">
-              <p className="mb-7 text-base leading-8 text-text-secondary">这里是毛豆的个人思考档案。拆解财经事件，观察 AI 变化，也诚实记录一个创作者如何从零开始。</p>
-              <Link href="/blog" className="btn-gradient px-6 py-3 text-sm font-semibold">阅读最新文章 <ArrowUpRight className="ml-2 h-4 w-4" /></Link>
-            </div>
-          </div>
+        <section className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b-2 border-text-primary pb-4">
+          <div><p className="publication-label mb-2">Independent research & notes</p><h1 className="text-3xl sm:text-4xl">毛豆的思考空间</h1></div>
+          <div className="font-mono text-xs leading-6 text-text-muted sm:text-right"><p>ISSUE 010</p><p>更新于 2026.06</p></div>
         </section>
 
-        <section className="grid border-b border-border md:grid-cols-3">
-          {[
-            ['01', '财经观察', '理解事件背后的利益、周期与结构。'],
-            ['02', '科技前沿', '关注 AI 如何改变创作与普通人的生活。'],
-            ['03', '创业记录', '公开记录个人 IP 从冷启动到长期主义。'],
-          ].map(item => (
-            <div key={item[0]} className="border-b border-border py-7 md:border-b-0 md:border-r md:px-7 md:first:pl-0 md:last:border-r-0">
-              <span className="font-mono text-xs text-neon-cyan">{item[0]}</span>
-              <h2 className="mt-8 text-2xl">{item[1]}</h2>
-              <p className="mt-3 text-sm text-text-muted">{item[2]}</p>
-            </div>
-          ))}
+        <section className="grid gap-8 border-b border-border pb-12 lg:grid-cols-[1.55fr_.65fr]">
+          <Link href={`/blog/${lead.slug}`} className="group block">
+            <div className="mb-5 flex items-center gap-3"><span className="issue-badge">本期主文</span><time className="font-mono text-xs text-text-muted">{lead.date}</time></div>
+            <h2 className="max-w-4xl text-[clamp(2.6rem,6vw,5.3rem)] leading-[1.02] group-hover:text-neon-cyan">{lead.title}</h2>
+            <p className="mt-6 max-w-3xl text-lg text-text-secondary">{lead.summary}</p>
+            <div className="mt-8 flex items-center gap-3 text-sm font-semibold text-neon-cyan">阅读全文 <ArrowRight className="h-4 w-4" /></div>
+          </Link>
+          <aside className="border-t border-border pt-6 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
+            <p className="publication-label mb-5">编辑手记</p>
+            <p className="text-xl leading-8">不追逐每一条热点，只保留那些值得反复思考的问题。</p>
+            <p className="mt-5 text-sm text-text-secondary">围绕财经事件、AI 变革与个人创作，记录判断形成的过程，而不仅是最后的结论。</p>
+            <div className="mt-8 border-t border-border pt-5 font-mono text-xs leading-7 text-text-muted"><p>作者：超哥 Harry</p><p>坐标：中国 · 新疆</p><p>持续写作：2026 — NOW</p></div>
+          </aside>
         </section>
 
-        <section className="py-14 sm:py-20">
-          <div className="mb-10 flex items-end justify-between border-b border-border pb-5">
-            <div><p className="editorial-kicker mb-3">Latest dispatches</p><h2 className="text-4xl sm:text-5xl">最近写下的</h2></div>
-            <Link href="/blog" className="hidden text-sm text-text-secondary sm:block">全部文章 ↗</Link>
-          </div>
-          <div className="grid gap-px overflow-hidden border border-border bg-border lg:grid-cols-3">
-            {featuredPosts.map((post, index) => (
-              <Link key={post.slug} href={`/blog/${post.slug}`} className="group flex min-h-[360px] flex-col bg-background p-6 hover:bg-card">
-                <div className="flex justify-between font-mono text-[11px] text-text-muted"><span>0{index + 1}</span><time>{post.date}</time></div>
-                <h3 className="mt-12 text-2xl leading-tight group-hover:text-neon-cyan">{post.title}</h3>
-                <p className="mt-5 text-sm text-text-secondary">{post.summary}</p>
-                <div className="mt-auto flex items-end justify-between pt-10">
-                  <div className="flex flex-wrap gap-2">{post.tags.slice(0, 2).map(tag => <span key={tag} className="tag">{tag}</span>)}</div>
-                  <ArrowUpRight className="h-5 w-5 text-text-muted group-hover:text-neon-cyan" />
-                </div>
+        <section className="grid gap-10 py-12 lg:grid-cols-[1fr_300px]">
+          <div>
+            <div className="mb-2 flex items-end justify-between border-b border-border pb-4"><div><p className="publication-label mb-2">Latest analysis</p><h2 className="text-3xl">最新研究</h2></div><Link href="/blog" className="text-sm text-neon-cyan">查看档案 ↗</Link></div>
+            {latest.map((post, index) => (
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="group grid gap-4 border-b border-border py-7 sm:grid-cols-[42px_1fr_110px_20px] sm:items-start">
+                <span className="font-mono text-xs text-text-muted">0{index + 2}</span>
+                <div><h3 className="text-xl group-hover:text-neon-cyan sm:text-2xl">{post.title}</h3><p className="mt-3 text-sm text-text-secondary">{post.summary}</p><div className="mt-4 flex gap-2">{post.tags.slice(0,2).map(tag => <span className="tag" key={tag}>{tag}</span>)}</div></div>
+                <time className="font-mono text-xs text-text-muted">{post.date}</time><ArrowUpRight className="h-4 w-4 text-text-muted" />
               </Link>
             ))}
           </div>
+          <aside>
+            <div className="rounded-lg bg-[#101b16] p-6 text-white">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[#78c7a9]">Research desk</p><h2 className="mt-4 text-2xl">把思考变成可用工具</h2><p className="mt-3 text-sm leading-6 text-white/65">配色、像素图和后续的数据工具，都从真实创作需求出发。</p><Link href="/tools" className="mt-7 inline-flex items-center gap-2 text-sm text-[#d9ff43]">打开工具箱 <ArrowUpRight className="h-4 w-4" /></Link>
+            </div>
+            <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
+              {[[BarChart3,'财经'],[BookOpen,'文章'],[Wrench,'工具']].map(([Icon,label]) => { const C = Icon as typeof BarChart3; return <div key={label as string} className="bg-card p-4 text-center"><C className="mx-auto h-4 w-4 text-neon-cyan" /><p className="mt-2 text-xs text-text-muted">{label as string}</p></div> })}
+            </div>
+          </aside>
         </section>
 
-        <section className="grid gap-8 border-y border-border py-10 md:grid-cols-[1fr_2fr]">
-          <p className="editorial-kicker">Working principle</p>
-          <blockquote className="text-3xl leading-tight sm:text-5xl">“先形成自己的判断，再借助工具把它表达清楚。”</blockquote>
-        </section>
+        <section className="border-y border-border py-8"><div className="grid gap-5 md:grid-cols-[170px_1fr]"><p className="publication-label">Coverage</p><div className="grid gap-5 sm:grid-cols-3">{[['财经观察','政策、市场与产业逻辑'],['科技前沿','AI 与生产方式变化'],['创作复盘','个人 IP 的真实试验']].map(([title,desc]) => <div key={title}><h3 className="text-lg">{title}</h3><p className="mt-2 text-sm text-text-muted">{desc}</p></div>)}</div></div></section>
       </div>
     </div>
   )

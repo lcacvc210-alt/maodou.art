@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, Tag, Lock, Unlock } from 'lucide-react'
+import { ArrowLeft, Clock, Lock, Unlock } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -123,8 +123,8 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="py-12 px-5 sm:px-8 sm:py-20">
-        <div className="max-w-5xl mx-auto">
+      <div className="py-12 px-5 sm:px-8 sm:py-16">
+        <div className="max-w-6xl mx-auto">
           {/* 返回按钮 */}
           <Link
             href="/blog"
@@ -135,33 +135,21 @@ export default function BlogPost() {
           </Link>
 
           {/* 文章头部 */}
-          <div className="mb-14 border-b border-border pb-12">
-            <p className="editorial-kicker mb-6">Personal dispatch</p>
-            <div className="flex items-center gap-4 text-text-muted text-xs font-mono mb-7">
-              <time className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                {post.date}
-              </time>
-              <span>·</span>
-              <span className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                {post.wordCount} 字
-              </span>
-            </div>
-
-            <h1 className="max-w-4xl text-4xl md:text-6xl font-bold mb-9 leading-[1.08]">
+          <div className="mb-12 grid gap-8 border-b-2 border-text-primary pb-10 lg:grid-cols-[1fr_210px]">
+            <div>
+            <p className="publication-label mb-5">Maodou research · Long read</p>
+            <h1 className="max-w-4xl text-4xl md:text-[3.25rem] font-bold mb-7 leading-[1.1]">
               {post.title}
             </h1>
-
-            {/* 标签 */}
             <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <span key={tag} className="tag text-sm">
-                  <Tag className="w-3 h-3 mr-1 inline" />
-                  {tag}
-                </span>
-              ))}
+              {post.tags.map((tag) => <span key={tag} className="tag text-sm">{tag}</span>)}
             </div>
+            </div>
+            <aside className="border-t border-border pt-5 font-mono text-xs leading-7 text-text-muted lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+              <p className="text-text-primary">发布日期</p><p>{post.date}</p>
+              <p className="mt-4 text-text-primary">阅读信息</p><p className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" />约 {Math.max(1, Math.ceil(post.wordCount / 500))} 分钟</p><p>{post.wordCount} 字</p>
+              <p className="mt-4 text-text-primary">作者</p><p>超哥 Harry</p>
+            </aside>
           </div>
 
           {/* 密码保护 */}
@@ -200,6 +188,8 @@ export default function BlogPost() {
             </div>
           ) : (
             /* 文章内容 */
+            <div className="grid lg:grid-cols-[160px_1fr] lg:gap-12">
+            <aside className="hidden lg:block"><div className="sticky top-32 border-t border-border pt-4"><p className="publication-label mb-3">Note</p><p className="text-xs leading-6 text-text-muted">本文仅代表写作时的个人观察，不构成任何投资建议。</p></div></aside>
             <article className="article-copy max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
                 h2: ({node, ...props}) => (
@@ -233,6 +223,7 @@ export default function BlogPost() {
                 {post.content}
               </ReactMarkdown>
             </article>
+            </div>
           )}
 
           {/* 文章底部 */}
