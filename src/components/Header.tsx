@@ -6,6 +6,7 @@ import { Menu, Moon, Search, Sun, X } from 'lucide-react'
 
 const links = [
   { href: '/blog', label: '深度文章' },
+  { href: '/weekly/', label: '毛豆周历' },
   { href: '/tools', label: '创作工具' },
   { href: '/about', label: '关于毛豆' },
 ]
@@ -29,7 +30,7 @@ export default function Header() {
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
         <Link href="/" className="text-[1.7rem] font-bold tracking-[-0.06em] text-[#f3f1e8]">MAODOU<span className="font-medium text-[#b7ff3c]">.art</span></Link>
         <div className="hidden items-center gap-7 md:flex">
-          {links.map(link => <Link key={link.href} href={link.href} className="text-sm font-medium text-[#c8c4b5] hover:text-[#b7ff3c]">{link.label}</Link>)}
+          {links.map(link => link.href === '/weekly/' ? <a key={link.href} href={link.href} className="text-sm font-medium text-[#c8c4b5] hover:text-[#b7ff3c]">{link.label}</a> : <Link key={link.href} href={link.href} className="text-sm font-medium text-[#c8c4b5] hover:text-[#b7ff3c]">{link.label}</Link>)}
           <div className="ml-2 flex items-center gap-4 border-l border-[#f3f1e8]/10 pl-6">
             <Search className="h-4 w-4 text-[#858274]" />
             <button onClick={toggleTheme} className="text-[#c8c4b5] hover:text-[#b7ff3c]" aria-label="切换主题"><Moon className="h-4 w-4 dark:hidden" /><Sun className="hidden h-4 w-4 dark:block" /></button>
@@ -37,7 +38,7 @@ export default function Header() {
         </div>
         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-[#f3f1e8] md:hidden" aria-label="打开菜单">{isMenuOpen ? <X /> : <Menu />}</button>
       </nav>
-      {isMenuOpen && <div className="border-t border-[#f3f1e8]/10 bg-[#080907] px-5 py-3 md:hidden">{links.map(link => <Link key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)} className="block border-b border-[#f3f1e8]/10 py-3 text-sm text-[#c8c4b5] last:border-0">{link.label}</Link>)}</div>}
+      {isMenuOpen && <div className="border-t border-[#f3f1e8]/10 bg-[#080907] px-5 py-3 md:hidden">{links.map(link => link.href === '/weekly/' ? <a key={link.href} href={link.href} className="block border-b border-[#f3f1e8]/10 py-3 text-sm text-[#c8c4b5]">{link.label}</a> : <Link key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)} className="block border-b border-[#f3f1e8]/10 py-3 text-sm text-[#c8c4b5] last:border-0">{link.label}</Link>)}</div>}
     </header>
   )
 }
