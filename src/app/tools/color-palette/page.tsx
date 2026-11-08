@@ -124,27 +124,9 @@ export default function ToolsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-neon-cyan/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-neon-purple/5 rounded-full blur-3xl" />
-      </div>
-
-      {/* 网格底纹 */}
-      <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(0,0,0,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,0,0,0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px'
-        }}
-      />
-
+    <div className="min-h-screen relative">
       {/* 导航栏 */}
-      <header className="border-b border-border/50 bg-background/60 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-border/50 bg-card backdrop-blur-xl sticky top-[88px] z-30">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 text-text-secondary hover:text-neon-cyan transition-colors">
@@ -158,9 +140,9 @@ export default function ToolsPage() {
       </header>
 
       {/* 内容区 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
         {/* 页面标题 */}
-        <div className="text-center mb-8 pt-8">
+        <div className="glass-panel glass-hero my-6 p-6 text-center sm:p-9">
           <p className="text-text-secondary text-sm mb-2">🎨 COLOR PALETTES</p>
           <h2 className="text-3xl font-bold text-text-primary mb-4">
             精选配色方案
@@ -196,7 +178,7 @@ export default function ToolsPage() {
 
           {/* 右侧：实时预览画布 */}
           <div className="lg:col-span-1">
-            <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <div className="lg:sticky lg:top-44 lg:max-h-[calc(100vh-12rem)] overflow-y-auto">
               {selectedPalette ? (
                 <PreviewCanvas
                   palette={selectedPalette}
@@ -211,7 +193,7 @@ export default function ToolsPage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* 分享弹窗 */}
       {showShareModal && selectedPalette && (
@@ -300,7 +282,7 @@ function PreviewCanvas({ palette, mode, onModeChange, onExport, onShare }: {
     : ['#ffffff', '#000000', palette.colors[0]]
 
   return (
-    <div className="card border border-border/50 backdrop-blur-xl rounded-2xl p-6 bg-white/80 dark:bg-slate-900/80 shadow-xl">
+    <div className="card border border-border/50 backdrop-blur-xl rounded-2xl p-6 shadow-xl">
       {/* 顶部工具栏 */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-bold text-text-primary flex items-center gap-2">
@@ -342,7 +324,7 @@ function PreviewCanvas({ palette, mode, onModeChange, onExport, onShare }: {
       <div className="flex gap-2 mb-6">
         <button
           onClick={onExport}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white font-medium text-sm hover:opacity-90 transition-opacity"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl btn-gradient font-medium text-sm hover:opacity-90 transition-opacity"
         >
           <Download className="w-4 h-4" />
           导出
@@ -541,7 +523,7 @@ function PosterPreview({ colors }: { colors: string[] }) {
 // 空状态
 function EmptyState() {
   return (
-    <div className="card border border-border/50 backdrop-blur-xl rounded-2xl p-8 text-center bg-white/80 dark:bg-slate-900/80">
+    <div className="card border border-border/50 backdrop-blur-xl rounded-2xl p-8 text-center">
       <Palette className="w-16 h-16 text-text-muted mx-auto mb-4 opacity-50" />
       <h3 className="text-lg font-bold text-text-primary mb-2">选择一套配色</h3>
       <p className="text-text-secondary text-sm">
@@ -588,7 +570,7 @@ function ShareModal({ palette, onClose }: { palette: typeof colorPalettes[0], on
           <button onClick={copyLink} className="flex-1 px-4 py-2.5 rounded-xl border border-border text-text-primary text-sm hover:bg-card transition-colors">
             复制链接
           </button>
-          <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white text-sm">
+          <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl btn-gradient text-sm">
             完成
           </button>
         </div>
@@ -624,7 +606,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
             onClick={() => onPageChange(page)}
             className={`w-10 h-10 rounded-lg font-medium transition-colors ${
               currentPage === page
-                ? 'bg-gradient-to-r from-neon-cyan to-neon-purple text-white'
+                ? 'btn-gradient'
                 : 'border border-border text-text-secondary hover:bg-card'
             }`}
           >

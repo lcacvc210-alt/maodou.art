@@ -7,15 +7,15 @@ export default function HomePageContent({ featuredPosts }: { featuredPosts: Post
   return (
     <div className="px-5 pb-20 pt-12 sm:px-8 sm:pt-16">
       <div className="mx-auto max-w-7xl">
-        <section className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b-2 border-text-primary pb-4">
+        <section className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div><p className="publication-label mb-2">Independent research & notes</p><h1 className="text-3xl sm:text-4xl">毛豆的思考空间</h1></div>
           <div className="font-mono text-xs leading-6 text-text-muted sm:text-right"><p>ISSUE 010</p><p>更新于 2026.06</p></div>
         </section>
 
-        <section className="grid gap-8 border-b border-border pb-12 lg:grid-cols-[1.55fr_.65fr]">
+        <section className="glass-panel glass-hero grid gap-8 p-6 sm:p-10 lg:p-12 lg:grid-cols-[1.55fr_.65fr]">
           <Link href={`/blog/${lead.slug}`} className="group block">
             <div className="mb-5 flex items-center gap-3"><span className="issue-badge">本期主文</span><time className="font-mono text-xs text-text-muted">{lead.date}</time></div>
-            <h2 className="max-w-4xl text-[clamp(2.6rem,6vw,5.3rem)] leading-[1.02] group-hover:text-neon-cyan">{lead.title}</h2>
+            <h2 className="max-w-4xl text-[clamp(2rem,4.4vw,4.25rem)] leading-[1.14] group-hover:text-neon-cyan">{lead.title}</h2>
             <p className="mt-6 max-w-3xl text-lg text-text-secondary">{lead.summary}</p>
             <div className="mt-8 flex items-center gap-3 text-sm font-semibold text-neon-cyan">阅读全文 <ArrowRight className="h-4 w-4" /></div>
           </Link>
@@ -39,8 +39,8 @@ export default function HomePageContent({ featuredPosts }: { featuredPosts: Post
             ))}
           </div>
           <aside>
-            <div className="rounded-lg bg-[#101b16] p-6 text-white">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[#78c7a9]">Research desk</p><h2 className="mt-4 text-2xl">把思考变成可用工具</h2><p className="mt-3 text-sm leading-6 text-white/65">配色、像素图和后续的数据工具，都从真实创作需求出发。</p><Link href="/tools" className="mt-7 inline-flex items-center gap-2 text-sm text-[#d9ff43]">打开工具箱 <ArrowUpRight className="h-4 w-4" /></Link>
+            <div className="glass-panel p-6">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-neon-cyan">Research desk</p><h2 className="mt-4 text-2xl">把思考变成可用工具</h2><p className="mt-3 text-sm leading-6 text-text-secondary">配色、像素图和后续的数据工具，都从真实创作需求出发。</p><Link href="/tools" className="mt-7 inline-flex items-center gap-2 text-sm text-neon-cyan">打开工具箱 <ArrowUpRight className="h-4 w-4" /></Link>
             </div>
             <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
               {[[BarChart3,'财经'],[BookOpen,'文章'],[Wrench,'工具']].map(([Icon,label]) => { const C = Icon as typeof BarChart3; return <div key={label as string} className="bg-card p-4 text-center"><C className="mx-auto h-4 w-4 text-neon-cyan" /><p className="mt-2 text-xs text-text-muted">{label as string}</p></div> })}
@@ -48,7 +48,7 @@ export default function HomePageContent({ featuredPosts }: { featuredPosts: Post
           </aside>
         </section>
 
-        <section className="border-y border-border py-8"><div className="grid gap-5 md:grid-cols-[170px_1fr]"><p className="publication-label">Coverage</p><div className="grid gap-5 sm:grid-cols-3">{[['财经观察','政策、市场与产业逻辑'],['科技前沿','AI 与生产方式变化'],['创作复盘','个人 IP 的真实试验']].map(([title,desc]) => <div key={title}><h3 className="text-lg">{title}</h3><p className="mt-2 text-sm text-text-muted">{desc}</p></div>)}</div></div></section>
+        <section className="glass-panel p-6 sm:p-8"><div className="grid gap-5 md:grid-cols-[170px_1fr]"><p className="publication-label">Coverage</p><div className="grid gap-5 sm:grid-cols-3">{[['财经观察','政策、市场与产业逻辑'],['科技前沿','AI 与生产方式变化'],['创作复盘','个人 IP 的真实试验']].map(([title,desc]) => <div key={title}><h3 className="text-lg">{title}</h3><p className="mt-2 text-sm text-text-muted">{desc}</p></div>)}</div></div></section>
       </div>
     </div>
   )

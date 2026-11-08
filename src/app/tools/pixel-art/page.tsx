@@ -27,7 +27,7 @@ export default function PixelArtPage() {
       canvas.width = img.width
       canvas.height = img.height
       
-      const blockSize = Math.floor(Math.min(img.width, img.height) / size)
+      const blockSize = Math.max(1, Math.floor(Math.min(img.width, img.height) / size))
       
       for (let y = 0; y < img.height; y += blockSize) {
         for (let x = 0; x < img.width; x += blockSize) {
@@ -100,7 +100,7 @@ export default function PixelArtPage() {
       canvas.width = img.width
       canvas.height = img.height
       
-      const blockSize = Math.floor(Math.min(img.width, img.height) / pixelSize)
+      const blockSize = Math.max(1, Math.floor(Math.min(img.width, img.height) / pixelSize))
       
       for (let y = 0; y < img.height; y += blockSize) {
         for (let x = 0; x < img.width; x += blockSize) {
@@ -163,7 +163,7 @@ export default function PixelArtPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       {/* 背景效果 */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="cyber-grid" />
@@ -195,7 +195,7 @@ export default function PixelArtPage() {
           {/* 演示区域 - 极简对比 */}
           {!uploadedImage && (
             <div className="mb-12">
-              <div className="flex items-center justify-center gap-8 max-w-4xl mx-auto">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 max-w-4xl mx-auto">
                 {/* 原图 */}
                 <div className="text-center">
                   <img
@@ -225,7 +225,7 @@ export default function PixelArtPage() {
 
           {/* 上传区域 */}
           {!uploadedImage ? (
-            <div className="card glow-border rounded-2xl p-12 text-center max-w-2xl mx-auto">
+            <div className="card glow-border rounded-2xl p-6 sm:p-12 text-center max-w-2xl mx-auto">
               <Upload className="w-16 h-16 text-neon-cyan mx-auto mb-4" />
               <h3 className="text-xl font-bold text-text-primary mb-2">上传图片开始创作</h3>
               <p className="text-text-secondary mb-6">支持 JPG、PNG、GIF 格式</p>
@@ -327,7 +327,7 @@ export default function PixelArtPage() {
                     onChange={(e) => setPixelSize(Number(e.target.value))}
                     className="w-full h-3 bg-card rounded-full appearance-none cursor-pointer accent-neon-cyan"
                     style={{
-                      background: `linear-gradient(to right, #06b6d4 0%, #a855f7 ${(pixelSize - 4) / 60 * 100}%, #374151 ${(pixelSize - 4) / 60 * 100}%, #374151 100%)`
+                      background: `linear-gradient(to right, var(--glass-green) ${(pixelSize - 4) / 60 * 100}%, var(--glass-tint) ${(pixelSize - 4) / 60 * 100}%)`
                     }}
                   />
                 </div>
@@ -337,7 +337,7 @@ export default function PixelArtPage() {
                   <button
                     onClick={processImage}
                     disabled={isProcessing || !uploadedImage}
-                    className="flex-1 bg-gradient-to-r from-neon-cyan to-neon-purple hover:from-neon-cyan/90 hover:to-neon-purple/90 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-neon-purple/25"
+                    className="btn-gradient flex-1 px-4 py-3 font-bold disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
                   >
                     {isProcessing ? '生成中...' : '生成像素图'}
                   </button>

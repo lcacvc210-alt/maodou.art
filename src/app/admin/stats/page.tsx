@@ -66,9 +66,9 @@ export default function StatsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center text-gray-600 dark:text-gray-400">
+      <div className="min-h-screen pt-8 pb-12">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="text-center text-text-secondary">
             加载中...
           </div>
         </div>
@@ -77,12 +77,12 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen pt-8 pb-12">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
         {/* 页面标题 */}
-        <div className="mb-8">
+        <div className="glass-panel glass-hero mb-6 p-6 sm:p-9">
           <h1 className="text-3xl font-bold mb-2">访问统计</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-text-secondary">
             网站访问数据分析
           </p>
         </div>
@@ -93,8 +93,8 @@ export default function StatsPage() {
             onClick={() => setActiveTab('overview')}
             className={`pb-2 px-4 transition-colors ${
               activeTab === 'overview'
-                ? 'border-b-2 border-blue-500 text-blue-500 font-semibold'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'border-b-2 border-blue-500 text-neon-cyan font-semibold'
+                : 'text-text-secondary hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             总览
@@ -103,8 +103,8 @@ export default function StatsPage() {
             onClick={() => setActiveTab('recent')}
             className={`pb-2 px-4 transition-colors ${
               activeTab === 'recent'
-                ? 'border-b-2 border-blue-500 text-blue-500 font-semibold'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'border-b-2 border-blue-500 text-neon-cyan font-semibold'
+                : 'text-text-secondary hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             最近访问
@@ -113,8 +113,8 @@ export default function StatsPage() {
             onClick={() => setActiveTab('daily')}
             className={`pb-2 px-4 transition-colors ${
               activeTab === 'daily'
-                ? 'border-b-2 border-blue-500 text-blue-500 font-semibold'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'border-b-2 border-blue-500 text-neon-cyan font-semibold'
+                : 'text-text-secondary hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             每日趋势
@@ -125,28 +125,28 @@ export default function StatsPage() {
         {activeTab === 'overview' && stats && (
           <div className="space-y-8">
             {/* 总访问量卡片 */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="glass-panel p-6">
               <h2 className="text-lg font-semibold mb-4">总访问量</h2>
-              <div className="text-4xl font-bold text-blue-500">
+              <div className="text-4xl font-bold text-neon-cyan">
                 {stats.total.toLocaleString()}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-sm text-text-secondary mt-2">
                 自网站上线以来的总访问次数
               </p>
             </div>
 
             {/* 最近 7 天趋势 */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="glass-panel p-6">
               <h2 className="text-lg font-semibold mb-4">最近 7 天访问趋势</h2>
               <div className="space-y-3">
                 {stats.daily.slice(0, 7).map((day) => (
                   <div key={day.date} className="flex items-center gap-4">
-                    <div className="w-24 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="w-24 text-sm text-text-secondary">
                       {formatDate(day.date)}
                     </div>
                     <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-4">
                       <div
-                        className="bg-blue-500 h-4 rounded-full transition-all"
+                        className="bg-neon-cyan h-4 rounded-full transition-all"
                         style={{
                           width: `${Math.min((day.count / Math.max(...stats.daily.map(d => d.count))) * 100, 100)}%`
                         }}
@@ -164,10 +164,10 @@ export default function StatsPage() {
 
         {/* 最近访问记录 */}
         {activeTab === 'recent' && stats && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="glass-panel overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-900">
+                <thead className="bg-card">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       时间
@@ -186,16 +186,16 @@ export default function StatsPage() {
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {stats.recent.map((visit) => (
                     <tr key={visit.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {formatDateTime(visit.created_at)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                         {visit.ip}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                         {visit.path}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                      <td className="px-6 py-4 text-sm text-text-secondary max-w-xs truncate">
                         {visit.user_agent}
                       </td>
                     </tr>
@@ -208,10 +208,10 @@ export default function StatsPage() {
 
         {/* 每日趋势 */}
         {activeTab === 'daily' && stats && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="glass-panel overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-900">
+                <thead className="bg-card">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       日期
@@ -224,10 +224,10 @@ export default function StatsPage() {
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {stats.daily.map((day) => (
                     <tr key={day.date} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {formatDate(day.date)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-text-primary">
                         {day.count.toLocaleString()}
                       </td>
                     </tr>

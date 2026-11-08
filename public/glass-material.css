@@ -1,0 +1,48 @@
+:root {
+  color-scheme: light;
+  --glass-ground: #eaf0e9;
+  --glass-haze: #b3c9b9;
+  --glass-warm: #ebd8bd;
+  --glass-sheet: rgb(252 254 250 / .61);
+  --glass-solid: #f6f9f4;
+  --glass-reading: rgb(250 252 248 / .94);
+  --glass-rim: rgb(255 255 255 / .84);
+  --glass-line: #a6b6a7;
+  --glass-ink: #1c2923;
+  --glass-secondary: #40534a;
+  --glass-muted: #52665a;
+  --glass-green: #216049;
+  --glass-on-green: #fff;
+  --glass-tint: #dbe9df;
+  --glass-shadow: 0 16px 42px rgb(39 68 53 / .10), inset 0 1px 0 var(--glass-rim);
+  --glass-scene:
+    radial-gradient(ellipse at 88% 8%, var(--glass-haze), transparent 48%),
+    radial-gradient(ellipse at 6% 46%, var(--glass-warm), transparent 45%),
+    var(--glass-ground);
+}
+
+:root.dark, :root[data-theme="dark"] {
+  color-scheme: dark;
+  --glass-ground: #14211c;
+  --glass-haze: #2c4b40;
+  --glass-warm: #3b342b;
+  --glass-sheet: rgb(32 49 42 / .69);
+  --glass-solid: #21332b;
+  --glass-reading: rgb(28 42 36 / .96);
+  --glass-rim: rgb(191 218 199 / .24);
+  --glass-line: #63786d;
+  --glass-ink: #eff6ef;
+  --glass-secondary: #c9d8ce;
+  --glass-muted: #aabfb2;
+  --glass-green: #a3d6bb;
+  --glass-on-green: #12261c;
+  --glass-tint: #304b3e;
+  --glass-shadow: 0 16px 42px rgb(0 0 0 / .25), inset 0 1px 0 var(--glass-rim);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root, :root.dark, :root[data-theme="dark"] {
+    --glass-sheet: var(--glass-solid);
+    --glass-reading: var(--glass-solid);
+  }
+}

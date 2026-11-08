@@ -12,18 +12,18 @@ export default function ToolsIndexPage() {
   return (
     <div className="px-5 pb-20 pt-14 sm:px-8 sm:pt-20">
       <div className="mx-auto max-w-7xl">
-        <section className="grid gap-8 border-b border-border pb-12 md:grid-cols-[1fr_auto] md:items-end">
-          <div><p className="editorial-kicker mb-5">Small tools, real utility</p><h1 className="text-6xl sm:text-8xl">创意工具</h1></div>
+        <section className="glass-panel glass-hero grid gap-8 p-6 sm:p-10 md:grid-cols-[1fr_auto] md:items-end">
+          <div><p className="editorial-kicker mb-5">Small tools, real utility</p><h1 className="text-5xl sm:text-6xl">创意工具</h1></div>
           <p className="max-w-md text-sm leading-7 text-text-secondary">不做功能堆叠，只解决创作过程中那些具体、重复又值得被简化的问题。</p>
         </section>
 
-        <section className="grid gap-px border-x border-b border-border bg-border md:grid-cols-2">
+        <section className="mt-6 grid gap-4 md:grid-cols-2">
           {tools.map(tool => {
             const online = tool.status === '已上线'
             const content = (
-              <article className={`group flex min-h-[330px] flex-col bg-background p-7 sm:p-9 ${online ? 'hover:bg-card' : 'opacity-60'}`}>
+              <article className={`card group flex min-h-[280px] flex-col p-7 sm:p-9 ${online ? '' : 'opacity-80'}`}>
                 <div className="flex justify-between font-mono text-xs text-text-muted"><span>{tool.number}</span><span className={online ? 'text-neon-cyan' : ''}>{tool.status}</span></div>
-                <h2 className="mt-14 text-3xl group-hover:text-neon-cyan">{tool.title}</h2>
+                <h2 className="mt-8 text-3xl group-hover:text-neon-cyan">{tool.title}</h2>
                 <p className="mt-4 max-w-md text-sm text-text-secondary">{tool.description}</p>
                 <div className="mt-auto flex items-end justify-between pt-10">
                   <div className="flex flex-wrap gap-2">{tool.features.map(feature => <span key={feature} className="tag">{feature}</span>)}</div>
@@ -31,11 +31,11 @@ export default function ToolsIndexPage() {
                 </div>
               </article>
             )
-            return online ? <Link key={tool.number} href={tool.href}>{content}</Link> : <div key={tool.number}>{content}</div>
+            return online ? <Link key={tool.number} href={tool.href} className="card-link">{content}</Link> : <div key={tool.number}>{content}</div>
           })}
         </section>
 
-        <section className="mt-14 grid gap-6 border-y border-border py-8 md:grid-cols-[1fr_auto] md:items-center">
+        <section className="glass-panel mt-8 grid gap-6 p-6 sm:p-8 md:grid-cols-[1fr_auto] md:items-center">
           <div><p className="editorial-kicker mb-3">Open suggestion</p><h2 className="text-3xl">有一个值得被做出来的小工具？</h2></div>
           <a href="mailto:harry@maodou.art" className="btn-gradient px-6 py-3 text-sm font-semibold">告诉我你的想法 ↗</a>
         </section>

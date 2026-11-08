@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    const isDark = localStorage.getItem('theme') === 'dark'
+    const isDark = (localStorage.getItem('theme') ?? localStorage.getItem('maodou-theme')) === 'dark'
     document.documentElement.classList.toggle('dark', isDark)
     document.documentElement.classList.toggle('light', !isDark)
   }, [])
