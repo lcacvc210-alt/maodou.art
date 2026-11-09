@@ -1,18 +1,16 @@
-<!doctype html>
-<html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="/weekly/"><title>毛豆周历 V1 · 财经与科技日程</title><meta name="description" content="毛豆周历 V1：2026年11月2日至8日财经与科技官方日程。核验于2026年10月31日，人工整理，不自动更新；关注仅为本地收藏。"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="commercial.css"><link rel="stylesheet" href="integration.css"></head>
+<!doctype html><html lang="zh-CN">
+<head><meta charset="UTF-8"><base href="/weekly/"><meta name="viewport" content="width=device-width,initial-scale=1"><title>毛豆周历 · 财经与科技日程</title><meta name="description" content="毛豆周历：财经与科技官方日程与历史归档，时间均为北京时间。"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="integration.css"></head>
 <body>
-<header class="nav"><a class="brand" href="/weekly/"><span class="logo">m<span>•</span></span>毛豆<span class="brand-sub">周历</span></a><a class="home-link" href="/">返回主站 ↗</a><button id="theme-toggle" class="theme-toggle" aria-label="切换深色主题">☾ 深色</button><span class="prototype">V1 · 日程试运行</span></header>
+<header class="nav"><a class="brand" href="/weekly/"><span class="logo">m<span>•</span></span>毛豆 <span>周历</span></a><a class="home-link" href="/">主站 ↗</a><div class="nav-actions"><button id="history-open" aria-haspopup="dialog" aria-controls="history" disabled>▦ 历史查看</button><button id="theme-toggle" aria-label="切换深色主题">☾ 深色</button></div></header>
 <main>
-<section class="intro"><div><div class="eyebrow">THE WEEK AHEAD</div><h1>这一周，<span>值得关注。</span></h1><p>把分散的财经与科技日程，放进你的一周。</p></div><div class="intro-note"><span class="live-dot"></span>消息有出处，预期有归属<br><small>时间统一显示为北京时间</small></div></section>
-<p class="edition-note" id="edition-note" role="status">V1 · 正在读取收录周次……</p>
-
-<section class="toolbar"><div class="week-controls"><button id="prev" aria-label="上一周">←</button><div><h2 id="week-title"></h2><span id="week-range"></span></div><button id="next" aria-label="下一周">→</button><button id="reset" class="reset">收录周次</button></div><div class="filters" aria-label="事件分类"><button class="active" data-filter="all" aria-pressed="true">全部</button><button data-filter="finance" aria-pressed="false"><i class="dot amber"></i>财经</button><button data-filter="technology" aria-pressed="false"><i class="dot blue"></i>科技</button></div></section>
-<section class="spotlight"><div class="section-label"><span>一周焦点</span><span id="event-count"></span></div><div id="highlights" class="highlights"></div></section>
-<section class="calendar-section"><div class="calendar-heading"><h3>按日浏览 <span>WEEKLY CALENDAR</span></h3><span>悬停浏览卡片 · 点击查看来源</span></div><div id="date-strip" class="date-strip"></div><div id="calendar" class="calendar"></div></section>
-<section class="principles"><div><span>01 / 可追溯</span><p>每条看点，都能回到原始来源。</p></div><div><span>02 / 有边界</span><p>事件安排与市场预期，分别呈现。</p></div><div><span>03 / 少一点噪音</span><p>只关注接下来值得留意的时间点。</p></div></section>
-<div class="demo"><span>正在加载</span>正在读取已核验日程……</div><footer><span>maodou.art <b> / </b> 毛豆周历</span><span>消息的搬运工 · 财经与科技前瞻</span></footer>
+<section class="masthead"><div><p class="eyebrow">财经 · 科技</p><h1 id="week-title">财经与科技前瞻</h1><p id="week-range" class="week-range"></p><p id="week-themes" class="week-themes"></p></div><div class="controls"><div class="filters" aria-label="事件分类"><button class="active" data-filter="all" aria-pressed="true">全部</button><button data-filter="finance" aria-pressed="false">财经</button><button data-filter="technology" aria-pressed="false">科技</button></div><div class="week-controls"><button id="prev" aria-label="上一周">← 上一周</button><button id="reset">收录周</button><button id="next" aria-label="下一周">下一周 →</button></div></div></section>
+<section class="spotlight" aria-labelledby="focus-title"><div class="section-heading"><h2 id="focus-title">焦点日程</h2><span>编辑精选 · 关注问题</span></div><div id="highlights" class="highlights"></div></section>
+<section class="schedule" aria-labelledby="schedule-title"><div class="section-heading schedule-heading"><h2 id="schedule-title">完整日程</h2><span id="event-count"></span></div><div id="calendar" class="calendar" aria-live="polite"></div></section>
+<details class="data-notes"><summary>数据说明 · 来源与时间</summary><div class="demo">正在读取已核验日程……</div><p>关注问题是编辑提供的阅读线索，并非市场一致预期或投资判断。点击事件可查官方来源。关注仅保存在当前浏览器，无账号同步或提醒。市场预期仅展示有来源的发布前快照。</p></details>
+<footer><span>maodou.art / 毛豆周历</span><span>时间均为北京时间</span></footer>
 </main>
 <dialog id="detail" aria-labelledby="detail-category"><div class="modal-head"><span id="detail-category"></span><button id="close" aria-label="关闭详情">✕</button></div><div id="detail-body"></div></dialog>
+<dialog id="history" aria-labelledby="history-title"><div class="history-heading"><h2 id="history-title">历史周历</h2><button id="history-close" aria-label="关闭历史周历">✕</button></div><p id="history-range"></p><div class="history-scroll" role="region" aria-label="历史日期，可横向滚动" tabindex="0"><div id="history-grid"></div></div><div class="history-foot"><span id="history-info" aria-live="polite">点击有颜色的日期查看日程</span><span class="history-legend">无已收录事件 <i data-count="0"></i><i data-count="1"></i><i data-count="2"></i><i data-count="3"></i><i data-count="4"></i> 事件较多</span></div></dialog>
 <script src="app.js"></script>
-</body></html>
+</body>
+</html>

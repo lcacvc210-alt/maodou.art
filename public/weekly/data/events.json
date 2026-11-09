@@ -1,6 +1,6 @@
 {
-  "week_start": "2026-11-02",
-  "checked_on": "2026-10-31",
+  "week_start": "2026-11-09",
+  "checked_on": "2026-11-08",
   "events": [
     {
       "uid": "ism-manufacturing-202611",
@@ -152,6 +152,195 @@
       "original_time": "2026-11-06 08:30 EST",
       "expectations": [],
       "verified_on": "2026-10-31",
+      "verification_method": "manual_official_page"
+    },
+    {
+      "uid": "nbs-inflation-202610",
+      "start_at": "2026-11-09T01:30:00Z",
+      "category": "finance",
+      "title": "中国 10 月 CPI 与 PPI",
+      "summary": "国家统计局发布居民消费价格及工业生产者价格月度报告。",
+      "tag": "通胀",
+      "level": 3,
+      "status": "官方已排期",
+      "publication_status": "published",
+      "source_id": "nbs",
+      "source_name": "中国国家统计局",
+      "source_url": "https://www.stats.gov.cn/xw/tjxw/tzgg/202512/t20251224_1962137.html",
+      "source_timezone": "Asia/Shanghai",
+      "original_time": "2026-11-09 09:30 CST",
+      "watch_question": "食品价格和工业品价格是否继续分化？",
+      "expectations": [
+        {
+          "summary": "CPI 同比 +0.8%（前值 +0.9%）；PPI 同比 +5.4%（前值 +5.0%）",
+          "source_name": "安联投信周报（彭博数据）",
+          "source_url": "https://tw.allianzgi.com/-/media/allianzgi/ap/taiwan/pdf/weekly-global-market-insight/weekly-global-market-insight-20261106-1.pdf?hash=262D6E5FFE38E9806547F4EFED32397F&rev=ec19c17409514154a75050d67c18414b#page=15",
+          "as_of": "2026-11-06"
+        }
+      ],
+      "verified_on": "2026-11-08",
+      "verification_method": "manual_official_page"
+    },
+    {
+      "uid": "bls-cpi-202610",
+      "start_at": "2026-11-10T13:30:00Z",
+      "category": "finance",
+      "title": "美国 10 月 CPI",
+      "summary": "BLS 发布 10 月消费者价格指数，包含总项与核心读数。",
+      "tag": "通胀",
+      "level": 3,
+      "status": "官方已排期",
+      "publication_status": "published",
+      "source_id": "bls",
+      "source_name": "美国劳工统计局 BLS",
+      "source_url": "https://www.bls.gov/schedule/2026/home.htm",
+      "source_timezone": "America/New_York",
+      "original_time": "2026-11-10 08:30 EST",
+      "watch_question": "总项通胀降温时，核心通胀能否同步放缓？",
+      "expectations": [
+        {
+          "summary": "CPI 环比 +0.3%（前值 +0.6%）；核心 CPI 环比 +0.2%（前值 +0.3%）",
+          "source_name": "安联投信周报（彭博数据）",
+          "source_url": "https://tw.allianzgi.com/-/media/allianzgi/ap/taiwan/pdf/weekly-global-market-insight/weekly-global-market-insight-20261106-1.pdf?hash=262D6E5FFE38E9806547F4EFED32397F&rev=ec19c17409514154a75050d67c18414b#page=15",
+          "as_of": "2026-11-06"
+        }
+      ],
+      "verified_on": "2026-11-08",
+      "verification_method": "manual_official_page"
+    },
+    {
+      "uid": "coreweave-q3-2026-call",
+      "start_at": "2026-11-10T22:00:00Z",
+      "category": "technology",
+      "title": "CoreWeave 三季度业绩电话会",
+      "summary": "公司举行 2026 年第三季度业绩电话会。所列时间为电话会时间。",
+      "tag": "财报电话会",
+      "level": 3,
+      "status": "官方已排期",
+      "publication_status": "published",
+      "source_id": "coreweave",
+      "source_name": "CoreWeave 投资者关系",
+      "source_url": "https://investors.coreweave.com/news/news-details/2026/CoreWeave-Announces-Date-of-Third-Quarter-2026-Financial-Results-and-Conference-Call/default.aspx",
+      "source_timezone": "America/New_York",
+      "original_time": "2026-11-10 17:00 EST",
+      "watch_question": "收入增长、资本开支和现金流之间的关系有何变化？",
+      "expectations": [
+        {
+          "summary": "营收约 35 亿美元；每股亏损 1.55 美元",
+          "source_name": "Kiplinger 财报日历",
+          "source_url": "https://www.kiplinger.com/investing/stocks/17494/next-week-earnings-calendar-stocks",
+          "as_of": "2026-11-06"
+        }
+      ],
+      "verified_on": "2026-11-08",
+      "verification_method": "manual_official_page"
+    },
+    {
+      "uid": "ons-gdp-2026q3",
+      "start_at": "2026-11-12T07:00:00Z",
+      "category": "finance",
+      "title": "英国三季度 GDP 初值",
+      "summary": "英国国家统计局发布 2026 年第三季度 GDP 初步估计。",
+      "tag": "经济增长",
+      "level": 2,
+      "status": "官方已排期",
+      "publication_status": "published",
+      "source_id": "ons",
+      "source_name": "英国国家统计局 ONS",
+      "source_url": "https://www.ons.gov.uk/releases/gdpfirstquarterlyestimateukjulytoseptember2026",
+      "source_timezone": "Europe/London",
+      "original_time": "2026-11-12 07:00 GMT",
+      "watch_question": "三季度增长是否加速，哪些行业在贡献增量？",
+      "expectations": [
+        {
+          "summary": "GDP 季环比 +0.7%（前值 +0.5%）",
+          "source_name": "安联投信周报（彭博数据）",
+          "source_url": "https://tw.allianzgi.com/-/media/allianzgi/ap/taiwan/pdf/weekly-global-market-insight/weekly-global-market-insight-20261106-1.pdf?hash=262D6E5FFE38E9806547F4EFED32397F&rev=ec19c17409514154a75050d67c18414b#page=15",
+          "as_of": "2026-11-06"
+        }
+      ],
+      "verified_on": "2026-11-08",
+      "verification_method": "manual_official_page"
+    },
+    {
+      "uid": "cisco-fy2027-q1-call",
+      "start_at": "2026-11-12T21:30:00Z",
+      "category": "technology",
+      "title": "思科第一财季业绩电话会",
+      "summary": "思科召开 2027 财年第一季度业绩电话会。所列时间为电话会时间。",
+      "tag": "财报电话会",
+      "level": 3,
+      "status": "官方已排期",
+      "publication_status": "published",
+      "source_id": "cisco",
+      "source_name": "思科新闻中心",
+      "source_url": "https://newsroom.cisco.com/c/r/newsroom/en/us/a/y2026/m11/cisco-schedules-conference-call-for-q1-fiscal-year-2027-financial-results.html",
+      "source_timezone": "America/Los_Angeles",
+      "original_time": "2026-11-12 13:30 PST",
+      "watch_question": "AI 网络设备的需求如何反映到订单、营收和毛利率？",
+      "expectations": [
+        {
+          "summary": "营收约 181 亿美元；每股收益 1.32 美元",
+          "source_name": "Kiplinger 财报日历",
+          "source_url": "https://www.kiplinger.com/investing/stocks/17494/next-week-earnings-calendar-stocks",
+          "as_of": "2026-11-06"
+        }
+      ],
+      "verified_on": "2026-11-08",
+      "verification_method": "manual_official_page"
+    },
+    {
+      "uid": "amat-fy2026-q4-call",
+      "start_at": "2026-11-12T21:30:00Z",
+      "category": "technology",
+      "title": "应用材料第四财季业绩电话会",
+      "summary": "公司召开第四财季及 2026 财年业绩电话会。所列时间为电话会时间。",
+      "tag": "财报电话会",
+      "level": 2,
+      "status": "官方已排期",
+      "publication_status": "published",
+      "source_id": "amat",
+      "source_name": "应用材料投资者关系",
+      "source_url": "https://ir.appliedmaterials.com/news-releases/news-release-details/applied-materials-report-fourth-quarter-and-fiscal-2026-results",
+      "source_timezone": "America/New_York",
+      "original_time": "2026-11-12 16:30 EST",
+      "watch_question": "设备需求和下一财季指引是否出现分化？",
+      "expectations": [
+        {
+          "summary": "每股收益 4.06 美元",
+          "source_name": "Kiplinger 财报日历",
+          "source_url": "https://www.kiplinger.com/investing/stocks/17494/next-week-earnings-calendar-stocks",
+          "as_of": "2026-11-06"
+        }
+      ],
+      "verified_on": "2026-11-08",
+      "verification_method": "manual_official_page"
+    },
+    {
+      "uid": "bls-ppi-202610",
+      "start_at": "2026-11-13T13:30:00Z",
+      "category": "finance",
+      "title": "美国 10 月 PPI",
+      "summary": "BLS 发布 10 月生产者价格指数。",
+      "tag": "通胀",
+      "level": 3,
+      "status": "官方已排期",
+      "publication_status": "published",
+      "source_id": "bls",
+      "source_name": "美国劳工统计局 BLS",
+      "source_url": "https://www.bls.gov/schedule/2026/home.htm",
+      "source_timezone": "America/New_York",
+      "original_time": "2026-11-13 08:30 EST",
+      "watch_question": "生产端价格压力是否与消费者价格同步回落？",
+      "expectations": [
+        {
+          "summary": "最终需求 PPI 环比 +0.4%（前值 +1.3%）；剔除食品和能源环比 +0.3%（前值 +0.7%）",
+          "source_name": "TD Economics 周报（彭博数据）",
+          "source_url": "https://economics.td.com/domains/economics.td.com/documents/reports/bottom-line/USBottomLine_20261106.pdf#page=4",
+          "as_of": "2026-11-06"
+        }
+      ],
+      "verified_on": "2026-11-08",
       "verification_method": "manual_official_page"
     }
   ]

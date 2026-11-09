@@ -1,20 +1,126 @@
-let seed=[];let dataset=null;
-let offset=0,filter='all';
-let savedItems=[];try{const value=JSON.parse(localStorage.getItem('maodou-official-following-v1')||'[]');if(Array.isArray(value))savedItems=value}catch{}const saved=new Set(savedItems);
-const isDark=(localStorage.getItem('theme')??localStorage.getItem('maodou-theme'))==='dark';document.documentElement.dataset.theme=isDark?'dark':'light';
+let seed=[],dataset=null,offset=0,filter='all';
+const $=s=>document.querySelector(s);
+function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}}
+const storedFollowing=readStorage('maodou-official-following-v1',[]);
+const saved=new Set(Array.isArray(storedFollowing)?storedFollowing:[]);
+document.documentElement.dataset.theme=(localStorage.getItem('theme')??localStorage.getItem('maodou-theme'))==='dark'?'dark':'light';
+let base=new Date('2026-11-02T00:00:00Z');
+const week=['周一','周二','周三','周四','周五','周六','周日'];
+const getDate=day=>new Date(base.getTime()+(offset*7+day)*86400000);
+const dayMs=86400000, historyWeeks=26;
+
+function weekLabel(start){
+ const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const get=type=>parts.find(part=>part.type===type).value;
+ const today=new Date(`${get('year')}-${get('month')}-${get('day')}T00:00:00Z`);
+ const monday=today.getTime()-((today.getUTCDay()+6)%7)*dayMs;
+ const delta=(start.getTime()-monday)/(7*dayMs);
+ return delta<0?'历史日程':delta===0?'本周前瞻':delta===1?'下周前瞻':'未来日程';
+}
+function showHistory(){
+ const counts=new Map();
+ for(const e of seed) counts.set(e.event_date,(counts.get(e.event_date)||0)+1);
+ const anchor=Math.max(base.getTime(),...seed.map(e=>Date.parse(e.event_date+'T00:00:00Z')));
+ const lastWeek=Math.floor((anchor-base.getTime())/(7*dayMs));
+ const firstWeek=Math.min(lastWeek-historyWeeks+1,...seed.map(e=>Math.floor((Date.parse(e.event_date+'T00:00:00Z')-base.getTime())/(7*dayMs))));
+ const columns=lastWeek-firstWeek+1;
+ const first=new Date(base.getTime()+firstWeek*7*dayMs), last=new Date(base.getTime()+(lastWeek*7+6)*dayMs);
+ $('#history-range').textContent=`${first.toISOString().slice(0,10)} 至 ${last.toISOString().slice(0,10)} · 北京时间`;
+ const grid=$('#history-grid');grid.style.setProperty('--weeks',columns);
+ let markup='';
+ week.forEach((name,i)=>{markup+=`<span class="history-weekday" style="grid-row:${i+2}">${name}</span>`});
+ let month=-1;
+ for(let w=0;w<columns;w++)for(let d=0;d<7;d++){
+   const day=new Date(first.getTime()+(w*7+d)*dayMs), iso=day.toISOString().slice(0,10), n=counts.get(iso)||0;
+   if(d===0&&month!==day.getUTCMonth()){month=day.getUTCMonth();markup+=`<span class="history-month" style="grid-column:${w+2}">${month+1}月</span>`}
+   const label=`${iso} · ${week[d]} · ${n?`${n} 条事件`:'未收录'}`;
+   markup+=`<button class="history-cell" style="grid-column:${w+2};grid-row:${d+2}" data-count="${Math.min(n,4)}" data-offset="${firstWeek+w}" data-day="${d}" aria-label="${label}" title="${label}" ${n?'':'disabled'}></button>`;
+ }
+ grid.innerHTML=markup;
+ $('#history-info').textContent=`${counts.size} 天有收录 · 点击日期查看`;
+ grid.querySelectorAll('button:enabled').forEach(cell=>{cell.onmouseenter=cell.onfocus=()=>{$('#history-info').textContent=cell.title};cell.onclick=()=>{
+   offset=Number(cell.dataset.offset);filter='all';syncFilters();render();$('#history').close();
+   const heading=$(`#day-${cell.dataset.day}`);if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});heading.scrollIntoView({block:'start'})}
+ }});
+ $('#history').showModal();grid.parentElement.scrollLeft=grid.parentElement.scrollWidth;
+}
+const date=d=>`${d.getUTCMonth()+1}月${d.getUTCDate()}日`;
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const questions={
+ 'bls-employment-202610':'新增就业、失业率与工资变化，是否给出一致的劳动力市场信号？',
+ 'boe-mpc-202611':'利率决定与新一轮经济预测，传递怎样的政策路径？',
+ 'qcom-fy2026-call':'全年经营表现与下一阶段指引，能否在电话会上得到更清晰的解释？',
+ 'arm-fy2027-q2-call':'管理层如何解释这一季的收入表现与后续业务展望？',
+ 'ism-manufacturing-202611':'新订单与生产分项，如何呈现制造业的变化？',
+ 'ism-services-202611':'业务活动与就业分项，如何呈现服务业的变化？',
+ 'bls-jolts-202609':'职位空缺与人员流动，反映出怎样的用工需求？',
+ 'bls-productivity-2026q3':'生产率与单位成本，呈现怎样的变化？'
+};
+const priority=['nbs-inflation-202610','bls-cpi-202610','coreweave-q3-2026-call','bls-employment-202610','qcom-fy2026-call','boe-mpc-202611','arm-fy2027-q2-call'];
+function visible(){return seed.map((e,id)=>({...e,id,day:Math.floor((Date.parse(e.event_date+'T00:00:00Z')-base.getTime())/86400000)-offset*7})).filter(e=>e.day>=0&&e.day<7&&(filter==='all'||e.category===filter))}
 function updateTheme(){const dark=document.documentElement.dataset.theme==='dark';$('#theme-toggle').textContent=dark?'☀ 浅色':'☾ 深色';$('#theme-toggle').setAttribute('aria-label',dark?'切换浅色主题':'切换深色主题')}
-function followButton(id){return `<button class="follow ${saved.has(seed[id].uid)?'following':''}" data-follow="${id}" aria-pressed="${saved.has(seed[id].uid)}" aria-label="${saved.has(seed[id].uid)?'取消关注':'关注'}${seed[id].title}">${saved.has(seed[id].uid)?'✓ 已关注':'＋ 关注'}</button>`}
-let base=new Date('2026-11-02T00:00:00Z');const week=['周一','周二','周三','周四','周五','周六','周日'];const $=s=>document.querySelector(s);const date=d=>`${d.getUTCMonth()+1}月${d.getUTCDate()}日`;const getDate=day=>new Date(base.getTime()+(offset*7+day)*86400000);const visible=()=>seed.map((e,id)=>({...e,id,day:Math.floor((Date.parse(e.event_date+'T00:00:00Z')-base.getTime())/86400000)-offset*7})).filter(e=>e.day>=0&&e.day<7&&(filter==='all'||e.category===filter));
-function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function openDetail(id){const e=seed[id];$('#detail-category').textContent=`${e.category==='finance'?'财经':'科技'} / ${e.tag} · 官方日程`;$('#detail-body').innerHTML=`<h2>${esc(e.title)}</h2><div class="detail-time">${e.event_date} · ${e.time} · 北京时间</div><div class="detail-block"><h3>已公布安排</h3><p>${esc(e.summary)}</p><span class="status">${e.status}</span></div><div class="detail-block"><h3>市场预期</h3><p>未收录经核实的一致预期，不提供涨跌方向判断。</p></div><div class="detail-block"><h3>官方原始来源 ↗</h3><a href="${esc(e.source_url)}" target="_blank" rel="noopener noreferrer">${esc(e.source_name)} ↗</a><p class="detail-time">公告当地时间：${e.original_time}<br>原始时区：${e.source_timezone}<br>人工核验日期：${e.verified_on}</p></div><p class="detail-note">按官方已公布日程整理，后续调整以发布方为准。关注度为编辑排序。</p>`;$('#detail').showModal()}
-function weekLabel(start){const today=new Date(new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())+'T00:00:00Z');const monday=today.getTime()-((today.getUTCDay()+6)%7)*86400000;const delta=(start.getTime()-monday)/604800000;return delta<0?'历史周次':delta===0?'本周日程':delta===1?'下周日程':'未来周次'}
-function render(){const events=visible(),sorted=[...events].sort((a,b)=>b.level-a.level||a.day-b.day);$('#week-title').textContent=weekLabel(getDate(0));$('#week-range').textContent=`${getDate(0).getUTCFullYear()}年 · ${date(getDate(0))} — ${date(getDate(6))}`;$('#event-count').textContent=`${events.length} 条已核验日程 · 编辑关注度`;
-$('#highlights').innerHTML=sorted.length?sorted.slice(0,3).map((e,i)=>`<button class="highlight" data-id="${e.id}"><span class="rank">0${i+1}</span><div><span class="mini-tag">${week[e.day]} · ${e.tag}</span><h4>${e.title}</h4><p>${e.summary}</p></div></button>`).join(''):'<div class="wide-empty">该周暂无已核验日程，请切回已收录周次。</div>';
-$('#date-strip').innerHTML=week.map((name,i)=>`<button class="date-jump ${i>4?'weekend':''}" data-day="${i}"><span>${name}</span><b>${getDate(i).getUTCDate()}<small> / ${getDate(i).getUTCMonth()+1}月</small></b></button>`).join('');
-$('#calendar').innerHTML=week.map((name,day)=>{const rows=events.filter(e=>e.day===day).sort((a,b)=>b.level-a.level);return `<div id="day-${day}" style="--day-count:${Math.max(rows.length,1)}" class="day ${day===5?'saturday':day===6?'sunday':''}"><div class="day-head"><div><strong>${name}</strong><small>${getDate(day).getUTCMonth()+1}月</small></div><span>${getDate(day).getUTCDate().toString().padStart(2,'0')}<small>日</small></span></div>${rows.length?`<div class="pack-label"><span>${rows.length} 条消息</span>${rows.length>1?'<button class="pack-toggle" aria-expanded="false">展开卡包 ⌄</button>':''}</div><div class="card-pack ${rows.length>1?'stacked':''}" style="--count:${rows.length}">${rows.map((e,i)=>`<article class="card ${e.category}" style="--i:${i};--n:${rows.length}"><button class="card-open" data-id="${e.id}"><div class="card-top"><span>${e.category==='finance'?'财经':'科技'} · ${e.tag}</span><span>${e.time}</span></div><h4>${e.title}</h4></button><div class="hover-preview"><p class="preview-summary">${e.summary}</p><div class="card-foot"><span class="status">${e.status}</span><span class="attention">${e.level===3?'重点':e.level===2?'留意':'日程'}</span>${followButton(e.id)}</div></div></article>`).join('')}</div>`:'<div class="empty"><span>—</span>暂无已核验日程</div>'}</div>`}).join('');document.querySelectorAll('[data-day]').forEach(el=>el.onclick=()=>document.getElementById(`day-${el.dataset.day}`).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}));document.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>openDetail(Number(el.dataset.id)));document.querySelectorAll('[data-follow]').forEach(el=>el.onclick=()=>{const id=Number(el.dataset.follow);saved.has(seed[id].uid)?saved.delete(seed[id].uid):saved.add(seed[id].uid);localStorage.setItem('maodou-official-following-v1',JSON.stringify([...saved]));el.classList.toggle('following',saved.has(seed[id].uid));el.textContent=saved.has(seed[id].uid)?'✓ 已关注':'＋ 关注';el.setAttribute('aria-pressed',String(saved.has(seed[id].uid)));el.setAttribute('aria-label',`${saved.has(seed[id].uid)?'取消关注':'关注'}${seed[id].title}`)});document.querySelectorAll('.pack-toggle').forEach(el=>el.onclick=()=>{const pack=el.closest('.day').querySelector('.card-pack');const expanded=pack.classList.toggle('expanded');el.setAttribute('aria-expanded',String(expanded));el.textContent=expanded?'收起卡包 ⌃':'展开卡包 ⌄'})}
-
-$('#prev').onclick=()=>{offset--;render()};$('#next').onclick=()=>{offset++;render()};$('#reset').onclick=()=>{offset=0;render()};document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});render()});$('#close').onclick=()=>$('#detail').close();$('#detail').addEventListener('click',e=>{if(e.target===$('#detail')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close()}});
-
+function followButton(e){const on=saved.has(e.uid);return `<button class="follow ${on?'following':''}" data-follow="${e.id}" aria-pressed="${on}" aria-label="${on?'取消关注':'关注'}${esc(e.title)}" title="${on?'取消关注':'关注'}">${on?'★':'☆'}</button>`}
+function forecasts(event){
+ return (event.expectations||[]).filter(item=>item.summary&&item.source_name&&item.as_of&&/^https:\/\//.test(item.source_url));
+}
+function watchQuestion(event){return event.watch_question||questions[event.uid]}
+function focusPreview(event){
+ const forecast=forecasts(event)[0];
+ const question=watchQuestion(event);
+ return forecast?{label:'市场预期',text:forecast.summary}:{label:question?'关注问题':'日程摘要',text:question||event.summary};
+}
+function openDetail(id){
+ const e=seed[id];
+ const market=forecasts(e).map(item=>`<p>${esc(item.summary)}</p><a href="${esc(item.source_url)}" target="_blank" rel="noopener noreferrer">${esc(item.source_name)} · ${esc(item.as_of)} ↗</a>`).join('');
+ $('#detail-category').textContent=`${e.category==='finance'?'财经':'科技'} / ${e.tag} · 官方日程`;
+ $('#detail-body').innerHTML=`<h2>${esc(e.title)}</h2><div class="detail-time">${e.event_date} · ${e.time} · 北京时间</div><div class="detail-block"><h3>已公布安排</h3><p>${esc(e.summary)}</p><span class="status">${esc(e.status)}</span></div><div class="detail-block"><h3>编辑关注问题</h3><p>${esc(watchQuestion(e)||'关注发布方披露的具体内容。')}</p></div><div class="detail-block"><h3>市场预期</h3>${market||'<p>该期未收录可核验的市场预期。</p>'}<p class="detail-note">市场预期为发布前的来源快照，实际结果以官方发布为准。</p></div><div class="detail-block"><h3>官方原始来源 ↗</h3><a href="${esc(e.source_url)}" target="_blank" rel="noopener noreferrer">${esc(e.source_name)} ↗</a><p class="detail-time">公告当地时间：${esc(e.original_time)}<br>原始时区：${esc(e.source_timezone)}<br>${e.verification_method==='official_calendar_sync'?'官方日历同步日期':'人工核验日期'}：${esc(e.verified_on)}</p></div><p class="detail-note">按官方已公布日程整理，后续调整以发布方为准。</p>`;
+ $('#detail').showModal();
+}
+function render(){
+ const events=visible();
+ const label=weekLabel(getDate(0));
+ $('#week-title').textContent=label;
+ const sorted=[...events].sort((a,b)=>{const ai=priority.indexOf(a.uid),bi=priority.indexOf(b.uid);return (ai<0?99:ai)-(bi<0?99:bi)||b.level-a.level||a.start_at.localeCompare(b.start_at)});
+ $('#week-range').innerHTML=`${date(getDate(0))} — ${date(getDate(6))}<small>${getDate(0).getUTCFullYear()}</small>`;
+ const themes=[];
+ if(events.some(e=>e.tag==='通胀'))themes.push('中美通胀');
+ if(events.some(e=>e.tag==='经济增长'))themes.push('英国经济增长');
+ if(events.some(e=>e.tag==='就业数据'))themes.push('美国就业数据');
+ if(events.some(e=>e.category==='technology'))themes.push('科技公司业绩');
+ if(events.some(e=>e.tag==='央行'))themes.push('英国央行决议');
+ $('#week-themes').textContent=events.length?`关注主题：${themes.length?themes.join('、'):'已收录的官方发布日程'}`:'该周暂无已核验日程';
+ $('#event-count').textContent=`${events.length} 条日程 · 北京时间`;
+ $('#focus-title').textContent=sorted.length>=3?'本期三件大事':'本期重点';
+ $('#highlights').innerHTML=sorted.length?sorted.slice(0,3).map((e,i)=>`<button class="highlight" data-id="${e.id}"><div class="focus-meta"><span>${week[e.day]} · ${e.time}</span><span class="focus-index">0${i+1}</span></div><h3>${esc(e.title)}</h3><p><span>${focusPreview(e).label}</span>${esc(focusPreview(e).text)}</p></button>`).join(''):'<div class="wide-empty">暂无已核验重点。可切回收录周查看。</div>';
+ let content='';
+ for(let day=0;day<7;day++){
+   const rows=events.filter(e=>e.day===day).sort((a,b)=>a.start_at.localeCompare(b.start_at)||a.uid.localeCompare(b.uid));
+   if(day===5&&!events.some(e=>e.day>=5)){content+='<div class="weekend-note"><span>周末</span><span>暂无已核验日程</span></div>';break}
+   const d=getDate(day),iso=d.toISOString().slice(0,10);
+   content+=`<section class="day" aria-labelledby="day-${day}"><div class="day-label"><h3 id="day-${day}">${week[day]}</h3><time datetime="${iso}">${d.getUTCMonth()+1}/${String(d.getUTCDate()).padStart(2,'0')}</time><span class="date-year">${d.getUTCFullYear()}</span></div><div class="day-events">${rows.length?rows.map(e=>`<article class="event-row" data-uid="${e.uid}"><time class="event-time" datetime="${e.start_at}">${e.time}</time><button class="event-content" data-id="${e.id}"><div class="event-title-line"><h4>${esc(e.title)}</h4><span class="event-tag">${e.category==='finance'?'财经':'科技'} · ${esc(e.tag)}</span></div><p>${esc(focusPreview(e).label)}：${esc(focusPreview(e).text)}</p></button>${followButton(e)}</article>`).join(''):'<p class="day-empty">暂无已核验日程</p>'}</div></section>`;
+ }
+ $('#calendar').innerHTML=content;
+ document.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>openDetail(Number(el.dataset.id)));
+ document.querySelectorAll('[data-follow]').forEach(el=>el.onclick=()=>{const e=seed[Number(el.dataset.follow)];saved.has(e.uid)?saved.delete(e.uid):saved.add(e.uid);localStorage.setItem('maodou-official-following-v1',JSON.stringify([...saved]));const on=saved.has(e.uid);el.classList.toggle('following',on);el.textContent=on?'★':'☆';el.setAttribute('aria-pressed',String(on));el.setAttribute('aria-label',`${on?'取消关注':'关注'}${e.title}`);el.title=on?'取消关注':'关注'});
+}
+$('#prev').onclick=()=>{offset--;render()};$('#next').onclick=()=>{offset++;render()};$('#reset').onclick=()=>{offset=0;render()};
+function syncFilters(){document.querySelectorAll('[data-filter]').forEach(x=>{const on=x.dataset.filter===filter;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))})}
+document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;syncFilters();render()});
+$('#history-open').onclick=showHistory;
+$('#history-close').onclick=()=>$('#history').close();
+$('#close').onclick=()=>$('#detail').close();
+for(const id of ['#detail','#history']){
+ const dialog=$(id);
+ dialog.addEventListener('click',e=>{
+   if(e.target!==dialog)return;
+   const r=dialog.getBoundingClientRect();
+   if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();
+ });
+}
 $('#theme-toggle').onclick=()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';localStorage.setItem('theme',document.documentElement.dataset.theme);updateTheme()};updateTheme();
-
-async function loadEvents(){try{const response=await fetch(new URL('./data/events.json',document.baseURI),{cache:'no-cache'});if(!response.ok)throw new Error('日程文件不可用');dataset=await response.json();seed=dataset.events.filter(e=>e.publication_status==='published').map(e=>{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(e.start_at));const get=t=>parts.find(p=>p.type===t).value;return {...e,event_date:`${get('year')}-${get('month')}-${get('day')}`,time:new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(e.start_at))}});base=new Date(dataset.week_start+'T00:00:00Z');const historical=weekLabel(base)==='历史周次';$('#edition-note').dataset.historical=String(historical);$('#edition-note').textContent=`V1 · ${historical?'历史周次 · ':''}收录 ${dataset.week_start} 至 ${new Date(base.getTime()+6*86400000).toISOString().slice(0,10)}，核验于 ${dataset.checked_on}。日程不会自动更新；关注仅为本浏览器收藏，无推送或账号同步。自动采集与编辑后台尚未实现。`;document.querySelector('.demo').innerHTML=`<span>官方日程</span>核验于 ${esc(dataset.checked_on)} · 北京时间 · 人工核验发布，尚未自动采集`;render()}catch(error){document.querySelector('.demo').textContent='日程文件加载失败，请刷新重试；若仍失败，请联系网站维护者。';$('#calendar').textContent='加载失败，请刷新重试。';console.error(error)}}loadEvents();
+async function loadEvents(){try{
+ const response=await fetch(new URL('./data/events.json',document.baseURI),{cache:'no-cache'});if(!response.ok)throw new Error('日程文件不可用');dataset=await response.json();
+ seed=dataset.events.filter(e=>e.publication_status==='published').map(e=>{if(new URL(e.source_url).protocol!=='https:')throw new Error('来源链接无效');const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(e.start_at));const get=t=>parts.find(p=>p.type===t).value;return {...e,event_date:`${get('year')}-${get('month')}-${get('day')}`,time:new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(e.start_at))}});
+ base=new Date(dataset.week_start+'T00:00:00Z');document.querySelector('.demo').textContent=`最近更新于 ${dataset.checked_on}。日程来自官方日历同步或人工核验；未来安排以发布方为准。`;render();$('#history-open').disabled=false;
+ }catch(error){document.querySelector('.demo').textContent='日程加载失败。';$('#calendar').innerHTML='<p class="wide-empty">日程暂时无法加载，请刷新重试。</p>';console.error(error)}
+}loadEvents();
