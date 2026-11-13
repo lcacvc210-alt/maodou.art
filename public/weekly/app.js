@@ -63,11 +63,17 @@ function followButton(e){const on=saved.has(e.uid);return `<button class="follow
 function forecasts(event){
  return (event.expectations||[]).filter(item=>item.summary&&item.source_name&&item.as_of&&/^https:\/\//.test(item.source_url));
 }
+function syncNotice(){
+ const sync=dataset.sync;
+ const at=sync?.last_success_at;
+ const time=at?new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',dateStyle:'short',timeStyle:'short',hour12:false}).format(new Date(at)):'尚无成功同步记录';
+ $('#sync-status').textContent=`官方日历最后检查：${time} · 覆盖美国 BEA、英国 ONS · 市场预期不自动更新`;
+}
 function watchQuestion(event){return event.watch_question||questions[event.uid]}
 function focusPreview(event){
  const forecast=forecasts(event)[0];
  const question=watchQuestion(event);
- return forecast?{label:'市场预期',text:forecast.summary}:{label:question?'关注问题':'日程摘要',text:question||event.summary};
+ return forecast?{label:`预期快照 · ${forecast.as_of}`,text:forecast.summary}:{label:question?'关注问题':'日程摘要',text:question||event.summary};
 }
 function openDetail(id){
  const e=seed[id];
@@ -121,6 +127,6 @@ $('#theme-toggle').onclick=()=>{document.documentElement.dataset.theme=document.
 async function loadEvents(){try{
  const response=await fetch(new URL('./data/events.json',document.baseURI),{cache:'no-cache'});if(!response.ok)throw new Error('日程文件不可用');dataset=await response.json();
  seed=dataset.events.filter(e=>e.publication_status==='published').map(e=>{if(new URL(e.source_url).protocol!=='https:')throw new Error('来源链接无效');const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(e.start_at));const get=t=>parts.find(p=>p.type===t).value;return {...e,event_date:`${get('year')}-${get('month')}-${get('day')}`,time:new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(e.start_at))}});
- base=new Date(dataset.week_start+'T00:00:00Z');document.querySelector('.demo').textContent=`最近更新于 ${dataset.checked_on}。日程来自官方日历同步或人工核验；未来安排以发布方为准。`;render();$('#history-open').disabled=false;
+ base=new Date(dataset.week_start+'T00:00:00Z');document.querySelector('.demo').textContent=`人工内容最近核验于 ${dataset.checked_on}。官方日程独立同步，历史预期保留原始快照日期；实际安排以发布方为准。`;syncNotice();render();$('#history-open').disabled=false;
  }catch(error){document.querySelector('.demo').textContent='日程加载失败。';$('#calendar').innerHTML='<p class="wide-empty">日程暂时无法加载，请刷新重试。</p>';console.error(error)}
 }loadEvents();

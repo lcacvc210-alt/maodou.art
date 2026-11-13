@@ -40,6 +40,8 @@ jobs:
           else
             node scripts/sync-weekly.mjs --write
           fi
+          echo "### Official calendar sync" >> "$GITHUB_STEP_SUMMARY"
+          node --input-type=module -e "import fs from 'node:fs'; const d=JSON.parse(fs.readFileSync('public/weekly/data/events.json')); console.log(JSON.stringify(d.sync || {},null,2))" >> "$GITHUB_STEP_SUMMARY"
       - name: Publish calendar changes
         if: inputs.preview_week == ''
         env:

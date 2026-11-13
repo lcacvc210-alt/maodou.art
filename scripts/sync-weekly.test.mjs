@@ -55,3 +55,11 @@ test('merge preserves history, does not advance an empty week and is idempotent'
   assert.deepEqual(merged.events[0], old)
   assert.equal(mergeWeek(merged, candidates.map(item => ({ ...item, verified_on: start })), start, start), merged)
 })
+
+test('a manual event does not block future releases sharing the same calendar URL', () => {
+  const candidate = fromOns({ breakdown: { total: 1 }, releases: [onsRelease] }, start, checked)[0]
+  const old = { ...candidate, uid: 'manual', start_at: '2026-10-18T07:00:00Z', verification_method: 'manual_official_page' }
+  const data = { week_start: '2026-11-09', events: [old] }
+  const merged = mergeWeek(data, [candidate], start, checked)
+  assert.equal(merged.events.length, 2)
+})

@@ -1,4 +1,5 @@
 @import url("/glass-material.css");
+.sync-status { color: var(--muted); font-size: 12px; line-height: 1.8; margin: 0 0 16px; }
 
 :root {
   font-family: Inter, "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;

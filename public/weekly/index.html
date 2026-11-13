@@ -3,6 +3,7 @@
 <body>
 <header class="nav"><a class="brand" href="/weekly/"><span class="logo">m<span>•</span></span>毛豆 <span>周历</span></a><a class="home-link" href="/">主站 ↗</a><div class="nav-actions"><button id="history-open" aria-haspopup="dialog" aria-controls="history" disabled>▦ 历史查看</button><button id="theme-toggle" aria-label="切换深色主题">☾ 深色</button></div></header>
 <main>
+<p id="sync-status" class="sync-status" role="status">正在读取日历检查状态……</p>
 <section class="masthead"><div><p class="eyebrow">财经 · 科技</p><h1 id="week-title">财经与科技前瞻</h1><p id="week-range" class="week-range"></p><p id="week-themes" class="week-themes"></p></div><div class="controls"><div class="filters" aria-label="事件分类"><button class="active" data-filter="all" aria-pressed="true">全部</button><button data-filter="finance" aria-pressed="false">财经</button><button data-filter="technology" aria-pressed="false">科技</button></div><div class="week-controls"><button id="prev" aria-label="上一周">← 上一周</button><button id="reset">收录周</button><button id="next" aria-label="下一周">下一周 →</button></div></div></section>
 <section class="spotlight" aria-labelledby="focus-title"><div class="section-heading"><h2 id="focus-title">焦点日程</h2><span>编辑精选 · 关注问题</span></div><div id="highlights" class="highlights"></div></section>
 <section class="schedule" aria-labelledby="schedule-title"><div class="section-heading schedule-heading"><h2 id="schedule-title">完整日程</h2><span id="event-count"></span></div><div id="calendar" class="calendar" aria-live="polite"></div></section>

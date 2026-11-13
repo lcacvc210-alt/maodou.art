@@ -1,15 +1,18 @@
 # Automatic weekly calendar updates
 
-This workflow is prepared on the local review branch. Nothing is enabled in
-GitHub or Vercel by this change alone.
+The workflow is enabled in GitHub. The site displays the last successful
+official-calendar check separately from the manual content verification date.
 
-- Schedule: 17:17 Beijing time daily. Sunday's run prepares the following
-  Monday's week; Monday to Saturday refresh the current week.
+- Schedule: 17:17 Beijing time daily (GitHub may delay scheduled runs). Every
+  run checks the current target week AND the next week. Sunday's target is the
+  following Monday; Monday to Saturday keep the current week as the default.
+  Newly collected future events are accessible with Next Week immediately.
 - Sources: the BEA machine-readable release calendar and ONS release search API.
   Only allowlisted indicators with explicit times and confirmed dates are added.
 - Data: keep manual rows, forecasts and past weeks. A feed error stops the job
   before writing. An empty week does not advance the displayed week. Re-running
-  an unchanged week does not create another commit.
+  unchanged event data keeps its prior verification date. A successful check
+  updates the sync timestamp, so a daily status commit is expected.
 - Market forecasts, China releases, most US releases and company calls are not
   covered by these feeds. Automatic entries have no forecast unless one was
   separately sourced. The BLS calendar returned HTTP 403 during validation.

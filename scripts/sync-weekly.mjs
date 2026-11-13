@@ -98,11 +98,11 @@ export function mergeWeek(data, candidates, start, checked) {
   if (start < data.week_start) return data
   const manualUrls = new Set(data.events
     .filter(item => item.verification_method !== 'official_calendar_sync')
-    .map(item => item.source_url))
+    .map(item => item.source_url + '|' + Date.parse(item.start_at)))
   const events = new Map(data.events.map(item => [item.uid, item]))
   let changed = false
   for (const item of candidates) {
-    if (manualUrls.has(item.source_url)) continue
+    if (manualUrls.has(item.source_url + '|' + Date.parse(item.start_at))) continue
     const prior = events.get(item.uid)
     if (prior && prior.verification_method !== 'official_calendar_sync') continue
     // Keep an unchanged event's original check date and any sourced estimates.
@@ -130,20 +130,35 @@ async function main() {
       isoDay(dayMs(start)) !== start || new Date(dayMs(start)).getUTCDay() !== 1) {
     throw new Error('--week must be a Monday in YYYY-MM-DD format')
   }
-  const end = isoDay(dayMs(start) + WEEK)
+  const end = isoDay(dayMs(start) + 2 * WEEK)
   const checked = dayKey(now)
   const file = resolve('public/weekly/data/events.json')
   const data = JSON.parse(await readFile(file, 'utf8'))
   // Include already-published releases so reruns during a week do not lose them.
   const onsUrl = type => `${ONS_FEED}?release-type=type-${type}&fromDate=${start}&toDate=${end}&limit=100`
   const [bea, upcoming, published] = await Promise.all([getJson(BEA_FEED), getJson(onsUrl('upcoming')), getJson(onsUrl('published'))])
-  const candidates = [...fromBea(bea, start, checked), ...fromOns(upcoming, start, checked), ...fromOns(published, start, checked)]
-  const next = mergeWeek(data, candidates, start, checked)
+  const nextStart = isoDay(dayMs(start) + WEEK)
+  const candidatesFor = week => [...fromBea(bea, week, checked), ...fromOns(upcoming, week, checked), ...fromOns(published, week, checked)]
+  const candidates = [...candidatesFor(start), ...candidatesFor(nextStart)]
+  const current = mergeWeek(data, candidatesFor(start), start, checked)
+  const future = mergeWeek(current, candidatesFor(nextStart), nextStart, checked)
+  const merged = { ...future, week_start: current.week_start }
+  const next = {
+    ...merged,
+    checked_on: data.checked_on,
+    sync: {
+      last_success_at: now.toISOString(),
+      checked_through: isoDay(dayMs(start) + 13 * DAY),
+      sources: ['美国 BEA', '英国 ONS'],
+      matched_events: candidates.length,
+      forecasts_automatic: false,
+    },
+  }
   console.log(JSON.stringify({
     week_start: start, candidates: candidates.map(({ title, start_at, source_url }) => ({ title, start_at, source_url })),
-    changed: next !== data, write: !!values.write,
+    changed: JSON.stringify(next) !== JSON.stringify(data), write: !!values.write,
   }, null, 2))
-  if (values.write && next !== data) {
+  if (values.write && JSON.stringify(next) !== JSON.stringify(data)) {
     await writeFile(file + '.tmp', JSON.stringify(next, null, 2) + '\n')
     await rename(file + '.tmp', file)
   }
