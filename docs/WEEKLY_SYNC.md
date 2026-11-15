@@ -7,6 +7,9 @@ official-calendar check separately from the manual content verification date.
   run checks the current target week AND the next week. Sunday's target is the
   following Monday; Monday to Saturday keep the current week as the default.
   Newly collected future events are accessible with Next Week immediately.
+  The browser chooses its default week from Beijing time independently of
+  scheduled writes. On Sundays it immediately selects the upcoming Monday;
+  Reset returns to that preferred week, not the JSON snapshot's stored week.
 - Sources: the BEA machine-readable release calendar and ONS release search API.
   Only allowlisted indicators with explicit times and confirmed dates are added.
 - Data: keep manual rows, forecasts and past weeks. A feed error stops the job

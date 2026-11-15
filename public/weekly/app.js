@@ -1,3 +1,4 @@
+import { preferredOffset } from './week-selection.mjs'
 let seed=[],dataset=null,offset=0,filter='all';
 const $=s=>document.querySelector(s);
 function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}}
@@ -109,7 +110,7 @@ function render(){
  document.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>openDetail(Number(el.dataset.id)));
  document.querySelectorAll('[data-follow]').forEach(el=>el.onclick=()=>{const e=seed[Number(el.dataset.follow)];saved.has(e.uid)?saved.delete(e.uid):saved.add(e.uid);localStorage.setItem('maodou-official-following-v1',JSON.stringify([...saved]));const on=saved.has(e.uid);el.classList.toggle('following',on);el.textContent=on?'★':'☆';el.setAttribute('aria-pressed',String(on));el.setAttribute('aria-label',`${on?'取消关注':'关注'}${e.title}`);el.title=on?'取消关注':'关注'});
 }
-$('#prev').onclick=()=>{offset--;render()};$('#next').onclick=()=>{offset++;render()};$('#reset').onclick=()=>{offset=0;render()};
+$('#prev').onclick=()=>{offset--;render()};$('#next').onclick=()=>{offset++;render()};$('#reset').onclick=()=>{offset=preferredOffset(dataset.week_start);render()};
 function syncFilters(){document.querySelectorAll('[data-filter]').forEach(x=>{const on=x.dataset.filter===filter;x.classList.toggle('active',on);x.setAttribute('aria-pressed',String(on))})}
 document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;syncFilters();render()});
 $('#history-open').onclick=showHistory;
@@ -127,6 +128,6 @@ $('#theme-toggle').onclick=()=>{document.documentElement.dataset.theme=document.
 async function loadEvents(){try{
  const response=await fetch(new URL('./data/events.json',document.baseURI),{cache:'no-cache'});if(!response.ok)throw new Error('日程文件不可用');dataset=await response.json();
  seed=dataset.events.filter(e=>e.publication_status==='published').map(e=>{if(new URL(e.source_url).protocol!=='https:')throw new Error('来源链接无效');const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(e.start_at));const get=t=>parts.find(p=>p.type===t).value;return {...e,event_date:`${get('year')}-${get('month')}-${get('day')}`,time:new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(e.start_at))}});
- base=new Date(dataset.week_start+'T00:00:00Z');document.querySelector('.demo').textContent=`人工内容最近核验于 ${dataset.checked_on}。官方日程独立同步，历史预期保留原始快照日期；实际安排以发布方为准。`;syncNotice();render();$('#history-open').disabled=false;
+ base=new Date(dataset.week_start+'T00:00:00Z');offset=preferredOffset(dataset.week_start);document.querySelector('.demo').textContent=`人工内容最近核验于 ${dataset.checked_on}。官方日程独立同步，历史预期保留原始快照日期；实际安排以发布方为准。`;syncNotice();render();$('#history-open').disabled=false;
  }catch(error){document.querySelector('.demo').textContent='日程加载失败。';$('#calendar').innerHTML='<p class="wide-empty">日程暂时无法加载，请刷新重试。</p>';console.error(error)}
 }loadEvents();

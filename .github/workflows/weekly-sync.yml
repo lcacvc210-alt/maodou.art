@@ -34,7 +34,7 @@ jobs:
         env:
           PREVIEW_WEEK: ${{ inputs.preview_week }}
         run: |
-          node --test scripts/sync-weekly.test.mjs
+          node --test scripts/sync-weekly.test.mjs scripts/week-selection.test.mjs
           if [ -n "$PREVIEW_WEEK" ]; then
             node scripts/sync-weekly.mjs --week "$PREVIEW_WEEK"
           else
