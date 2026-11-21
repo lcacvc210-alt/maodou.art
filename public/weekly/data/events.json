@@ -1,5 +1,5 @@
 {
-  "week_start": "2026-11-16",
+  "week_start": "2026-11-23",
   "checked_on": "2026-11-08",
   "events": [
     {
@@ -478,13 +478,13 @@
     }
   ],
   "sync": {
-    "last_success_at": "2026-11-20T17:52:25.156Z",
-    "checked_through": "2026-11-29",
+    "last_success_at": "2026-11-21T16:50:07.633Z",
+    "checked_through": "2026-12-06",
     "sources": [
       "美国 BEA",
       "英国 ONS"
     ],
-    "matched_events": 7,
+    "matched_events": 2,
     "forecasts_automatic": false
   }
 }
